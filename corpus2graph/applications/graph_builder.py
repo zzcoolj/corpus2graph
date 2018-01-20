@@ -8,11 +8,11 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import configparser
-import graph_data_provider as gdp
+import corpus2graph.graph_data_provider as gdp
 import sys
 sys.path.insert(0, '../common/')
-import common
-import multi_processing
+import corpus2graph.util
+import corpus2graph.multi_processing
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -29,7 +29,7 @@ class NoGraph:
             2. graph_wordId2index (temp var), on which cooccurrence_matrix element's order is based, is built on this.
             3. graph_index2wordId represents cooccurrence_matrix element's order
         """
-        self.name_prefix = multi_processing.get_file_name(encoded_edges_count_file_path).split('.')[0]
+        self.name_prefix = corpus2graph.multi_processing.get_file_name(encoded_edges_count_file_path).split('.')[0]
         valid_wordId = list(set(gdp.read_valid_vocabulary(valid_vocabulary_path)))  # make sure no duplication
         # ATTENTION: graph_index2wordId should be a list of which the index order is from 0 to vocab_size-1
         # TODO LATER No need to make graph_index2wordId an int list. Find where graph_index2wordId is needed and changed them.
@@ -40,7 +40,7 @@ class NoGraph:
         # initialize numpy 2d array
         cooccurrence_matrix = np.zeros((vocab_size, vocab_size))
         # read encoded_edges_count_file
-        for line in common.read_file_line_yielder(encoded_edges_count_file_path):
+        for line in corpus2graph.util.read_file_line_yielder(encoded_edges_count_file_path):
             # ATTENTION: line e.g. '17'  '57'  '10' or '57'   '17'  '10' (only one of them will appear in the file.)
             (source, target, weight) = line.split("\t")
             cooccurrence_matrix[graph_wordId2index[source]][graph_wordId2index[target]] = weight
@@ -87,7 +87,7 @@ class NoGraph:
         if output_folder:
             file_prefix = output_folder + self.name_prefix + '_' + str(t)
             np.save(file_prefix + '_step_rw_matrix.npy', result, fix_imports=False)
-            common.write_to_pickle(self.graph_index2wordId, file_prefix + '_step_rw_nodes.pickle')
+            corpus2graph.util.write_to_pickle(self.graph_index2wordId, file_prefix + '_step_rw_nodes.pickle')
         return self.graph_index2wordId, result
 
 
@@ -100,14 +100,14 @@ class NXGraph:
 
     @classmethod
     def from_gpickle(cls, path):
-        name_prefix = multi_processing.get_file_name(path).split('.')[0]
+        name_prefix = corpus2graph.multi_processing.get_file_name(path).split('.')[0]
         graph = nx.read_gpickle(path)
         return cls(graph, name_prefix, nx.is_directed(graph))
 
     @classmethod
     def from_encoded_edges_count_file(cls, path, directed=config.getboolean("graph", "directed"),
                                       output_folder=config['graph']['graph_folder']):
-        name_prefix = multi_processing.get_file_name(path).split('.')[0]
+        name_prefix = corpus2graph.multi_processing.get_file_name(path).split('.')[0]
         if directed:
             graph = nx.read_weighted_edgelist(path, create_using=nx.DiGraph(), nodetype=int)
         else:
@@ -171,7 +171,7 @@ class NXGraph:
         matrix = nx.floyd_warshall_numpy(self.graph)  # ATTENTION: return type is NumPy matrix not NumPy ndarray.
         # ATTENTION: after saving, NumPy matrix has been changed to 2darray.
         np.save(output_folder + self.name_prefix + '_matrix.npy', matrix, fix_imports=False)
-        common.write_to_pickle(self.graph.nodes(), output_folder + self.name_prefix + '_nodes.pickle')
+        corpus2graph.util.write_to_pickle(self.graph.nodes(), output_folder + self.name_prefix + '_nodes.pickle')
         return self.graph.nodes(), matrix
 
     def __get_stochastic_matrix(self):
@@ -195,7 +195,7 @@ class NXGraph:
         if output_folder:
             file_prefix = output_folder + self.name_prefix + '_' + str(t)
             np.save(file_prefix + '_step_rw_matrix.npy', result, fix_imports=False)
-            common.write_to_pickle(self.graph.nodes(), file_prefix + '_step_rw_nodes.pickle')
+            corpus2graph.util.write_to_pickle(self.graph.nodes(), file_prefix + '_step_rw_nodes.pickle')
         return self.graph.nodes(), result
 
     def one_to_t_step_random_walk_stochastic_matrix_yielder(self, t):

@@ -283,8 +283,13 @@ def write_dict_to_file_value_type_specified(file_path, dictionary, value_type):
             value_str = '\t'.join(value)
             f.write('%s\t%s\n' % (key, value_str))
 
-
-
+def read_two_columns_file_to_build_dictionary_type_specified_bis(file, key_type, value_type):
+    d = {}
+    with open(file, encoding='utf-8') as f:
+        for line in f:
+            (key, val) = line.rstrip('\n').split("\t")
+            d[key_type(key)] = value_type(val)
+        return d
 
 
 # TESTS

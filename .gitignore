@@ -1,0 +1,6 @@
+.idea/
+*.pyc
+__pycache__/
+data/
+output/
+LICENSE.txt
