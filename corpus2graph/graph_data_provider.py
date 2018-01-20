@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Zheng ZHANG'
 
 import string
@@ -7,10 +8,9 @@ import configparser
 from multiprocessing import Pool
 from itertools import repeat
 import sys
-sys.path.insert(0, '../common/')
-import common
+import util
 import multi_processing
-
+import nltk
 config = configparser.ConfigParser()
 config.read('config.ini')
 
@@ -34,6 +34,397 @@ Remove rare tokens:
     So information of all tokens are kept in transferred edges files and transferred word count files.
     We just ignore the information about invalid vocabulary in the final stage.
 """
+class FileParser(object):
+    def __init__(self,
+                 file_parser = 'txt',
+                 xml_node_path = None):
+        self.file_parser = file_parser
+        self.xml_node_path = xml_node_path
+    def xml_parser(self, file_path, xml_node_path):
+        for paragraph in util.search_all_specific_nodes_in_xml_known_node_path(file_path,
+                                                                               xml_node_path):
+            for sent in util.tokenize_informal_paragraph_into_sentences(paragraph):
+                yield sent
+
+    def txt_parser(self, file_path):
+        with open(file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                yield line
+
+    def __call__(self, file_path):
+        if self.file_parser == 'txt':
+            for sent in self.txt_parser(file_path):
+                yield sent
+        if self.file_parser == 'xml':
+            for sent in self.xml_parser(file_path, self.xml_node_path):
+                yield sent
+
+class WordPreprocessor(object):
+    # default: config file.
+    def __init__(self, remove_numbers = True, remove_punctuations = True,
+                 stem_word = True, lowercase = True):
+        self.remove_numbers = remove_numbers
+        self.remove_punctuations = remove_punctuations
+        self.stem_word = stem_word
+        self.lowercase = lowercase
+        self.puncs = set(string.punctuation)
+    def apply(self, word):
+        if self.remove_numbers and word.isnumeric():
+            return ''
+        # Remove punctuations
+        # if all(j.isdigit() or j in puncs for j in word):
+        if self.remove_punctuations:
+            if all(c in self.puncs for c in word):
+                return ''
+        # Stem word
+        if self.stem_word:
+            word = util.stem_word(word)
+        # Make all words in lowercase
+        if self.lowercase:
+            word = word.lower()
+
+        return word
+
+class Tokenizer(object):
+    # TODO add catch exception for user defined function
+    def __init__(self, word_tokenizer='Treebank'):
+        if word_tokenizer == 'Treebank':
+            from nltk.tokenize import TreebankWordTokenizer
+            self.tokenizer = TreebankWordTokenizer()
+        elif word_tokenizer == 'PunktWord':
+            # PunktTokenizer splits on punctuation, but keeps it with the word. => [‘this’, “‘s”, ‘a’, ‘test’]
+            from nltk.tokenize import PunktWordTokenizer
+            self.tokenizer = PunktWordTokenizer()
+        elif word_tokenizer == 'WordPunct':
+            # WordPunctTokenizer splits all punctuations into separate tokens. => [‘This’, “‘”, ‘s’, ‘a’, ‘test’]
+            from nltk.tokenize import WordPunctTokenizer
+            self.tokenizer = WordPunctTokenizer()
+        else:
+            self.tokenizer = None
+    def apply(self, text):
+        if self.tokenizer is not None:
+            return self.tokenizer.tokenize(text)
+        else:
+            return text
+
+
+class WordProcessing(object):
+    def __init__(self, output_folder, file_parser='txt',
+                 xml_node_path=None, word_tokenizer='WordPunct',
+                 remove_numbers = True, remove_punctuations = True,
+                 stem_word = True, lowercase = True):
+        '''
+
+        :param output_folder:
+        :param file_parser:
+        :param xml_node_path:
+        :param word_tokenizer:
+        :param remove_numbers:
+        :param remove_punctuations:
+        :param stem_word:
+        :param lowercase:
+        '''
+        self.output_folder = output_folder
+        self.file_parser = FileParser(file_parser = file_parser,
+                                      xml_node_path = xml_node_path)
+        self.wpreprocessor = WordPreprocessor(remove_numbers = remove_numbers,
+                                              remove_punctuations = remove_punctuations,
+                                              stem_word = stem_word, lowercase = lowercase)
+        self.tokenizer = Tokenizer(word_tokenizer = word_tokenizer)
+
+    def fromfile(self, file_path):
+        print('Processing file %s (%s)...' % (file_path, multi_processing.get_pid()))
+
+        word2id = dict()  # key: word <-> value: index
+        id2word = dict()
+        encoded_text = []
+        puncs = set(string.punctuation)
+        for sent in self.file_parser(file_path):
+            encoded_sent = []
+            for word in self.tokenizer.apply(sent):
+                word = self.wpreprocessor.apply(word)
+                if not word:
+                    continue
+                if word not in word2id:
+                    id = len(word2id)
+                    word2id[word] = id
+                    id2word[id] = word
+                encoded_sent.append(word2id[word])
+            encoded_text.append(encoded_sent)
+
+        file_basename = multi_processing.get_file_name(file_path)
+        # names like "AA", "AB", ...
+        parent_folder_name = multi_processing.get_file_folder(file_path).split('/')[-1]
+        # Write the encoded_text
+        if not self.output_folder.endswith('/'):
+            self.output_folder += '/'
+        util.write_to_pickle(encoded_text,
+                             self.output_folder + "encoded_text_" + parent_folder_name + "_" + file_basename + ".pickle")
+        # Write the dictionary
+        write_dict_to_file(self.output_folder + "dict_" + parent_folder_name + "_" + file_basename + ".dicloc", word2id)
+
+    def merge_local_dict(self):
+        def read_first_column_file_to_build_set(file):
+            d = set()
+            with open(file, encoding='utf-8') as f:
+                for line in f:
+                    (key, val) = line.rstrip('\n').split("\t")
+                    d.add(key)
+            return d
+
+        # Take all files in the folder starting with "dict_"
+        files = [os.path.join(self.output_folder, name) for name in os.listdir(self.output_folder)
+                 if (os.path.isfile(os.path.join(self.output_folder, name))
+                     and name.startswith("dict_") and (name != 'dict_merged.txt'))]
+        all_keys = set()
+        for file in files:
+            all_keys |= read_first_column_file_to_build_set(file)
+
+        result = dict(zip(all_keys, range(len(all_keys))))
+        write_dict_to_file(self.output_folder + 'dict_merged.txt', result)
+        return result
+
+class WordPairsExtractor(object):
+
+    def __init__(self, max_window_size, type = 'postion'):
+        self.max_window_size = max_window_size
+        self.type = type
+
+    def position_based(self, encoded_text):
+        # TODO change to yield
+        edges = {}
+
+        # Construct edges
+        for i in range(2, self.max_window_size + 1):
+            edges[i] = []
+        for encoded_sent in encoded_text:
+            sentence_len = len(encoded_sent)
+            for start_index in range(sentence_len - 1):
+                if start_index + self.max_window_size < sentence_len:
+                    max_range = self.max_window_size + start_index
+                else:
+                    max_range = sentence_len
+
+                for end_index in range(1 + start_index, max_range):
+                    current_window_size = end_index - start_index + 1
+                    # encoded_edge = [encoded_sent[start_index], encoded_sent[end_index]]
+                    encoded_edge = (encoded_sent[start_index], encoded_sent[end_index])
+                    edges[current_window_size].append(encoded_edge)
+        return edges
+
+    def apply(self, encoded_text, distance):
+        if self.type == 'postion':
+            return self.position_based(encoded_text)
+        else:
+            return {}
+
+
+#word pairs extractor (sent, distance) word pairs
+
+
+class SentenceProcessing(object):
+    def __init__(self, dicts_folder, output_folder, max_window_size):
+        self.dicts_folder = dicts_folder
+        self.output_folder = output_folder
+        self.max_window_size = max_window_size
+        self.word_pair_extractor = WordPairsExtractor(max_window_size = max_window_size, type = 'postion')
+
+
+    def word_count(self, encoded_text, file_name, local_dict_file_path):
+        result = dict(Counter([item for sublist in encoded_text for item in sublist]))
+        folder_name = multi_processing.get_file_folder(local_dict_file_path)
+        util.write_dict_to_file(folder_name + "/word_count_" + file_name + ".txt", result, 'str')
+        return result
+
+    def get_transfer_dict_for_local_dict(self, local_dict, merged_dict):
+        """
+        local_dict:
+            "hello": 37
+        merged_dict:
+            "hello": 52
+        transfer_dict:
+            37: 52
+        """
+        transfer_dict = {}
+        for key, value in local_dict.items():
+            transfer_dict[value] = merged_dict[key]
+        return transfer_dict
+
+    def write_edges_of_different_window_size(self, encoded_text, file_basename):
+        edges = self.word_pair_extractor.apply(encoded_text, file_basename)
+        # Write edges to files
+        if not self.output_folder.endswith('/'):
+            self.output_folder += '/'
+        for i in range(2, self.max_window_size + 1):
+            util.write_list_to_file(
+                self.output_folder + file_basename + "_encoded_edges_distance_{0}.txt".format(i), edges[i])
+
+    def fromfile(self, local_dict_file_path):
+        print('Processing file %s (%s)...' % (local_dict_file_path, multi_processing.get_pid()))
+
+        # TODO Put into init or not for speed up
+        merged_dict = util.read_two_columns_file_to_build_dictionary_type_specified_bis(
+            file=multi_processing.get_file_folder(local_dict_file_path) + '/dict_merged.txt', key_type=str,
+            value_type=int)
+        local_dict = util.read_two_columns_file_to_build_dictionary_type_specified_bis(local_dict_file_path, str, int)
+        transfer_dict = self.get_transfer_dict_for_local_dict(local_dict, merged_dict)
+        '''
+        Local dict and local encoded text must be in the same folder,
+        and their names should be look like below:
+            local_dict_file_path:       dict_xin_eng_200410.txt
+            local_encoded_text_pickle:  pickle_encoded_text_xin_eng_200410
+        '''
+        # Get encoded_text_pickle path according to local_dict_file_path
+        local_encoded_text_pickle = local_dict_file_path.replace("dict_", "encoded_text_")[
+                                    :-len(config['graph']['local_dict_extension'])]
+        local_encoded_text = util.read_pickle(local_encoded_text_pickle + ".pickle")
+        # Translate the local encoded text with transfer_dict
+        transferred_encoded_text = []
+        for encoded_sent in local_encoded_text:
+            transfered_encoded_sent = []
+            for encoded_word in encoded_sent:
+                transfered_encoded_sent.append(transfer_dict[encoded_word])
+            transferred_encoded_text.append(transfered_encoded_sent)
+
+        file_name = multi_processing.get_file_name(local_dict_file_path).replace("dict_", "")
+        # Word count
+        self.word_count(transferred_encoded_text, file_name, local_dict_file_path)
+        # Write edges files of different window size based on the transfered encoded text
+        self.write_edges_of_different_window_size(transferred_encoded_text, file_name)
+
+    def merge_transferred_word_count(self):
+        # TODO LATER too slow, improve this part
+        files = get_files_startswith(self.dicts_folder, "word_count_")
+        c = Counter()
+        for file in files:
+            counter_temp = util.read_two_columns_file_to_build_dictionary_type_specified(file, int, int)
+            c += counter_temp
+        util.write_dict_to_file(self.dicts_folder + "word_count_all.txt", dict(c), 'str')
+        return dict(c)
+
+
+class WordPairsProcessing(object):
+    def __init__(self, valid_count):
+        pass
+
+    def write_valid_vocabulary(merged_word_count_path, output_path, min_count, max_vocab_size):
+        # Tomorrow
+        # TODO valid_vocabulary should be a dict. No need to write as list and then read list changing to dict.
+        # TODO LATER maybe it's not the fastest way to sort dict.
+        merged_word_count = read_two_columns_file_to_build_dictionary_type_specified_bis(file=merged_word_count_path,
+                                                                                         key_type=str, value_type=int)
+
+        valid_word_count = {}
+        for word_id, count in merged_word_count.items():
+            if count >= min_count:
+                valid_word_count[word_id] = count
+        if max_vocab_size and (max_vocab_size != 'None'):
+            if int(max_vocab_size) < len(valid_word_count):
+                valid_vocabulary = list(sorted(valid_word_count, key=valid_word_count.get, reverse=True))[
+                                   :int(max_vocab_size)]
+            else:
+                valid_vocabulary = list(valid_word_count.keys())
+        else:
+            valid_vocabulary = list(valid_word_count.keys())
+
+        util.write_simple_list_to_file(output_path, valid_vocabulary)
+        return valid_vocabulary
+
+    def multiprocessing_merge_edges_count_of_a_specific_window_size(window_size, process_num,
+                                                                    min_count=config['graph']['min_count'],
+                                                                    dicts_folder=config['graph'][
+                                                                        'dicts_and_encoded_texts_folder'],
+                                                                    edges_folder=config['graph']['edges_folder'],
+                                                                    output_folder=config['graph']['graph_folder'],
+                                                                    max_vocab_size=config['graph']['max_vocab_size'],
+                                                                    already_existed_window_size=None):
+        def counted_edges_from_worker_yielder(paths):
+            for path in paths:
+                yield Counter(util.read_pickle(path))
+
+        def get_counted_edges(files, process_num=process_num):
+            # Each thread processes several target edges files and save their counted_edges.
+            files_size = len(files)
+            num_tasks = files_size // int(config['graph']['safe_files_number_per_processor'])
+            if num_tasks < process_num:
+                num_tasks = process_num
+            if files_size <= num_tasks:  # extreme case: #files less than #tasks => use only one processor to handle all.
+                num_tasks = 1
+                process_num = 1
+            files_list = multi_processing.chunkify(lst=files, n=num_tasks)
+            p = Pool(process_num)
+            if (max_vocab_size == 'None') or (not max_vocab_size):
+                worker_valid_vocabulary_path = dicts_folder + 'valid_vocabulary_min_count_' + str(min_count) + '.txt'
+            else:
+                worker_valid_vocabulary_path = dicts_folder + 'valid_vocabulary_min_count_' + str(
+                    min_count) + '_vocab_size_' + str(
+                    max_vocab_size) + '.txt'
+            worker_output_path = edges_folder
+            p.starmap(get_counted_edges_worker,
+                      zip(files_list, repeat(worker_valid_vocabulary_path), repeat(worker_output_path)))
+            p.close()
+            p.join()
+            print('All sub-processes done.')
+
+            # Merge all counted_edges from workers and get the final result.
+            counted_edges_paths = multi_processing.get_files_endswith(data_folder=edges_folder,
+                                                                      file_extension='.pickle')
+            count = 1
+            counted_edges = Counter(dict())
+            for c in counted_edges_from_worker_yielder(paths=counted_edges_paths):
+                counted_edges += c
+                print('%i/%i files processed.' % (count, len(files_list)), end='\r', flush=True)
+                count += 1
+
+            # Remove all counted_edges from workers.
+            for file_path in counted_edges_paths:
+                print('Remove file %s' % file_path)
+                os.remove(file_path)
+
+            return counted_edges
+
+        # Get all target edges files' paths to be merged and counted.
+        files = {}
+        for i in range(2, window_size + 1):
+            files_of_specific_distance = multi_processing.get_files_endswith(edges_folder,
+                                                                             "_encoded_edges_distance_{0}.txt".format(
+                                                                                 i))
+            if not files_of_specific_distance:
+                print('No encoded edges file of window size ' + str(window_size) + '. Reset window size to ' + str(
+                    i - 1) + '.')
+                window_size = i - 1
+                break
+            else:
+                files[i] = files_of_specific_distance
+
+        # Generate counted edges of different window sizes in a stepwise way.
+        if not already_existed_window_size:
+            # No encoded edges count already existed, calculate them from distance 2 to distance size.
+            counted_edges_of_specific_window_size = None
+            start_distance = 2
+        else:
+            already_existed_counted_edges_path = output_folder + "encoded_edges_count_window_size_" \
+                                                 + str(already_existed_window_size) + ".txt"
+            d = {}
+            with open(already_existed_counted_edges_path) as f:
+                for line in f:
+                    (first, second, count) = line.rstrip('\n').split("\t")
+                    d[(first, second)] = int(count)
+            counted_edges_of_specific_window_size = Counter(d)
+            start_distance = already_existed_window_size + 1
+        for i in range(start_distance, window_size + 1):
+            counted_edges_of_distance_i = get_counted_edges(files[i])
+            if i == 2:
+                # counted edges of window size 2 = counted edges of distance 2
+                counted_edges_of_specific_window_size = counted_edges_of_distance_i
+            else:
+                # counted edges of window size n (n>=3) = counted edges of window size n-1 + counted edges of distance n
+                counted_edges_of_specific_window_size += counted_edges_of_distance_i
+            util.write_dict_to_file(output_folder + "encoded_edges_count_window_size_" + str(i) + ".txt",
+                                    counted_edges_of_specific_window_size, 'tuple')
+
+        return counted_edges_of_specific_window_size
+
 
 
 def write_encoded_text_and_local_dict_for_xml(file_path, output_folder):
@@ -46,13 +437,13 @@ def write_encoded_text_and_local_dict_for_xml(file_path, output_folder):
     encoded_text = []
     puncs = set(string.punctuation)
 
-    for paragraph in common.search_all_specific_nodes_in_xml_known_node_path(file_path,
-                                                                             config['input data']['xml_node_path']):
-        for sent in common.tokenize_informal_paragraph_into_sentences(paragraph):
+    for paragraph in util.search_all_specific_nodes_in_xml_known_node_path(file_path,
+                                                                           config['input data']['xml_node_path']):
+        for sent in util.tokenize_informal_paragraph_into_sentences(paragraph):
             encoded_sent = []
 
             # update the dictionary
-            for word in common.tokenize_text_into_words(sent, "WordPunct"):
+            for word in util.tokenize_text_into_words(sent, "WordPunct"):
 
                 # Remove numbers
                 if word.isnumeric():
@@ -65,7 +456,7 @@ def write_encoded_text_and_local_dict_for_xml(file_path, output_folder):
                     continue
 
                 # Stem word
-                word = common.stem_word(word)
+                word = util.stem_word(word)
 
                 # Make all words in lowercase
                 word = word.lower()
@@ -81,9 +472,9 @@ def write_encoded_text_and_local_dict_for_xml(file_path, output_folder):
     # Write the encoded_text
     if not output_folder.endswith('/'):
         output_folder += '/'
-    common.write_to_pickle(encoded_text, output_folder + "encoded_text_" + file_basename + ".pickle")
+    util.write_to_pickle(encoded_text, output_folder + "encoded_text_" + file_basename + ".pickle")
     # Write the dictionary
-    common.write_dict_to_file(output_folder + "dict_" + file_basename + ".dicloc", word2id, 'str')
+    util.write_dict_to_file(output_folder + "dict_" + file_basename + ".dicloc", word2id, 'str')
 
 
 def write_encoded_text_and_local_dict_for_txt(file_path, output_folder):
@@ -106,7 +497,7 @@ def write_encoded_text_and_local_dict_for_txt(file_path, output_folder):
         for sent in sentences():
             encoded_sent = []
             # update the dictionary
-            for word in common.tokenize_text_into_words(sent, "WordPunct"):
+            for word in util.tokenize_text_into_words(sent, "WordPunct"):
                 # Remove numbers
                 if config.getboolean("input data", "remove_numbers") and word.isnumeric():
                     # TODO LATER Maybe distinguish some meaningful numbers, like year
@@ -118,7 +509,7 @@ def write_encoded_text_and_local_dict_for_txt(file_path, output_folder):
                         continue
                 # Stem word
                 if config.getboolean("input data", "stem_word"):
-                    word = common.stem_word(word)
+                    word = util.stem_word(word)
                 # Make all words in lowercase
                 if config.getboolean("input data", "lowercase"):
                     word = word.lower()
@@ -146,8 +537,8 @@ def write_encoded_text_and_local_dict_for_txt(file_path, output_folder):
     # Write the encoded_text
     if not output_folder.endswith('/'):
         output_folder += '/'
-    common.write_to_pickle(encoded_text,
-                           output_folder + "encoded_text_" + parent_folder_name + "_" + file_basename + ".pickle")
+    util.write_to_pickle(encoded_text,
+                         output_folder + "encoded_text_" + parent_folder_name + "_" + file_basename + ".pickle")
     # Write the dictionary
     write_dict_to_file(output_folder + "dict_" + parent_folder_name + "_" + file_basename + ".dicloc", word2id)
 
@@ -199,7 +590,7 @@ def get_transferred_edges_files_and_transferred_word_count(local_dict_file_path,
     def word_count(encoded_text, file_name):
         result = dict(Counter([item for sublist in encoded_text for item in sublist]))
         folder_name = multi_processing.get_file_folder(local_dict_file_path)
-        common.write_dict_to_file(folder_name + "/word_count_" + file_name + ".txt", result, 'str')
+        util.write_dict_to_file(folder_name + "/word_count_" + file_name + ".txt", result, 'str')
         return result
 
     def get_transfer_dict_for_local_dict(local_dict, merged_dict):
@@ -240,7 +631,7 @@ def get_transferred_edges_files_and_transferred_word_count(local_dict_file_path,
         if not output_folder.endswith('/'):
             output_folder += '/'
         for i in range(2, max_window_size + 1):
-            common.write_list_to_file(
+            util.write_list_to_file(
                 output_folder + file_basename + "_encoded_edges_distance_{0}.txt".format(i), edges[i])
 
     print('Processing file %s (%s)...' % (local_dict_file_path, multi_processing.get_pid()))
@@ -258,7 +649,7 @@ def get_transferred_edges_files_and_transferred_word_count(local_dict_file_path,
     # Get encoded_text_pickle path according to local_dict_file_path
     local_encoded_text_pickle = local_dict_file_path.replace("dict_", "encoded_text_")[
                                 :-len(config['graph']['local_dict_extension'])]
-    local_encoded_text = common.read_pickle(local_encoded_text_pickle + ".pickle")
+    local_encoded_text = util.read_pickle(local_encoded_text_pickle + ".pickle")
     # Translate the local encoded text with transfer_dict
     transferred_encoded_text = []
     for encoded_sent in local_encoded_text:
@@ -294,16 +685,17 @@ def merge_transferred_word_count(word_count_folder, output_folder):
     files = get_files_startswith(word_count_folder, "word_count_")
     c = Counter()
     for file in files:
-        counter_temp = common.read_two_columns_file_to_build_dictionary_type_specified(file, int, int)
+        counter_temp = util.read_two_columns_file_to_build_dictionary_type_specified(file, int, int)
         c += counter_temp
-    common.write_dict_to_file(output_folder + "word_count_all.txt", dict(c), 'str')
+    util.write_dict_to_file(output_folder + "word_count_all.txt", dict(c), 'str')
     return dict(c)
 
 
 def write_valid_vocabulary(merged_word_count_path, output_path, min_count, max_vocab_size):
+    # Tomorrow
     # TODO valid_vocabulary should be a dict. No need to write as list and then read list changing to dict.
     # TODO LATER maybe it's not the fastest way to sort dict.
-    merged_word_count = read_two_columns_file_to_build_dictionary_type_specified(file=merged_word_count_path,
+    merged_word_count = read_two_columns_file_to_build_dictionary_type_specified_bis(file=merged_word_count_path,
                                                                                  key_type=str, value_type=int)
 
     valid_word_count = {}
@@ -319,7 +711,7 @@ def write_valid_vocabulary(merged_word_count_path, output_path, min_count, max_v
     else:
         valid_vocabulary = list(valid_word_count.keys())
 
-    common.write_simple_list_to_file(output_path, valid_vocabulary)
+    util.write_simple_list_to_file(output_path, valid_vocabulary)
     return valid_vocabulary
 
 
@@ -351,8 +743,8 @@ def get_counted_edges_worker(edges_files_paths, valid_vocabulary_path, output_fo
     # The result could be counted edges of several files (i.e. len(edges_files_paths) >= 1). Using the first file name
     # as part of the pickle file name is just to make sure the pickle name is unique (pickle file couldn't be
     # overwritten).
-    common.write_to_pickle(counted_edges,
-                           output_folder + multi_processing.get_file_name(edges_files_paths[0]) + ".pickle")
+    util.write_to_pickle(counted_edges,
+                         output_folder + multi_processing.get_file_name(edges_files_paths[0]) + ".pickle")
 
 
 def multiprocessing_merge_edges_count_of_a_specific_window_size(window_size, process_num,
@@ -365,7 +757,7 @@ def multiprocessing_merge_edges_count_of_a_specific_window_size(window_size, pro
                                                                 already_existed_window_size=None):
     def counted_edges_from_worker_yielder(paths):
         for path in paths:
-            yield Counter(common.read_pickle(path))
+            yield Counter(util.read_pickle(path))
 
     def get_counted_edges(files, process_num=process_num):
         # Each thread processes several target edges files and save their counted_edges.
@@ -443,25 +835,19 @@ def multiprocessing_merge_edges_count_of_a_specific_window_size(window_size, pro
         else:
             # counted edges of window size n (n>=3) = counted edges of window size n-1 + counted edges of distance n
             counted_edges_of_specific_window_size += counted_edges_of_distance_i
-        common.write_dict_to_file(output_folder + "encoded_edges_count_window_size_" + str(i) + ".txt",
-                                  counted_edges_of_specific_window_size, 'tuple')
+        util.write_dict_to_file(output_folder + "encoded_edges_count_window_size_" + str(i) + ".txt",
+                                counted_edges_of_specific_window_size, 'tuple')
 
     return counted_edges_of_specific_window_size
 
-
+# move it to util
 def write_dict_to_file(file_path, dictionary):
     with open(file_path, 'w', encoding='utf-8') as f:
         for key, value in dictionary.items():
             f.write('%s\t%s\n' % (key, value))
 
 
-def read_two_columns_file_to_build_dictionary_type_specified(file, key_type, value_type):
-    d = {}
-    with open(file, encoding='utf-8') as f:
-        for line in f:
-            (key, val) = line.rstrip('\n').split("\t")
-            d[key_type(key)] = value_type(val)
-        return d
+
 
 
 def get_index2word(file, key_type=int, value_type=str):
@@ -547,23 +933,23 @@ def filter_edges(min_count,
 
     valid_vocabulary = dict.fromkeys(read_valid_vocabulary(file_path=new_valid_vocabulary_path))
     filtered_edges = {}
-    for line in common.read_file_line_yielder(old_encoded_edges_count_path):
+    for line in util.read_file_line_yielder(old_encoded_edges_count_path):
         (source, target, weight) = line.split("\t")
         if (source in valid_vocabulary) and (target in valid_vocabulary):
             filtered_edges[(source, target)] = int(weight)
-    common.write_dict_to_file(output_folder + "encoded_edges_count_filtered.txt", filtered_edges, 'tuple')
+    util.write_dict_to_file(output_folder + "encoded_edges_count_filtered.txt", filtered_edges, 'tuple')
     return filtered_edges
 
 
 def reciprocal_for_edges_weight(old_encoded_edges_count_path, output_folder=config['graph']['graph_folder']):
     reciprocal_weight_edges = {}
-    for line in common.read_file_line_yielder(old_encoded_edges_count_path):
+    for line in util.read_file_line_yielder(old_encoded_edges_count_path):
         (source, target, weight) = line.split("\t")
         # reciprocal_weight_edges[(source, target)] = 1./int(weight)
         reciprocal_weight_edges[(source, target)] = 1
     # output_name = multi_processing.get_file_name(old_encoded_edges_count_path).split('.txt')[0]+'_reciprocal.txt'
     output_name = multi_processing.get_file_name(old_encoded_edges_count_path).split('.txt')[0]+'_allONE.txt'
-    common.write_dict_to_file(output_folder + output_name, reciprocal_weight_edges, 'tuple')
+    util.write_dict_to_file(output_folder + output_name, reciprocal_weight_edges, 'tuple')
     return reciprocal_weight_edges
 
 
@@ -578,7 +964,7 @@ def merge_encoded_edges_count_for_undirected_graph(old_encoded_edges_count_path,
         17  57  10 or 57   17  10 (only one of them will appear in the file.)
     """
     merged_weight_edges = {}
-    for line in common.read_file_line_yielder(old_encoded_edges_count_path):
+    for line in util.read_file_line_yielder(old_encoded_edges_count_path):
         (source, target, weight) = line.split("\t")
         if (target, source) in merged_weight_edges:
             # edge[source][target] inverse edge edge[target][source] already put into the merged_weight_edges
@@ -587,7 +973,7 @@ def merge_encoded_edges_count_for_undirected_graph(old_encoded_edges_count_path,
             # The first time merged_weight_edges meets edge[source][target] or its inverse edge edge[target][source]
             merged_weight_edges[(source, target)] = int(weight)
     output_name = multi_processing.get_file_name(old_encoded_edges_count_path).split('.txt')[0] + '_undirected.txt'
-    common.write_dict_to_file(output_folder + output_name, merged_weight_edges, 'tuple')
+    util.write_dict_to_file(output_folder + output_name, merged_weight_edges, 'tuple')
     return merged_weight_edges
 
 
