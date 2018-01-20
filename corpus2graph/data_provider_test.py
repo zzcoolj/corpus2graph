@@ -24,7 +24,7 @@ class TestGraphDataProvider(unittest.TestCase):
 
     def test_file_parser(self):
         tfp = FileParser()
-        filepath = '/Users/yin/projects/corpus2graph/corpus2graph/unittest_data/AA/wiki_03.txt'
+        filepath = 'unittest_data/AA/wiki_03.txt'
         lines = list(tfp(filepath))
         reflines = ['alfred hitchcock', 'sir alfred joseph hitchcock ( 00 august 0000 – 00 april 0000 ) was '
                                         'an english film director and producer , at times referred to as " the master of suspense " .he pioneered many elements of the suspense and psychological thriller genres .']
@@ -40,12 +40,12 @@ class TestGraphDataProvider(unittest.TestCase):
 
     def test_word_processing(self):
         wp = WordProcessing('output/intermediate data for unittest/dicts_and_encoded_texts/')
-        wp.fromfile('/Users/yin/projects/corpus2graph/corpus2graph/unittest_data/ZT/wiki_95.txt')
+        wp.fromfile('unittest_data/ZT/wiki_95.txt')
         wp.merge_local_dict()
 
     def test_sentence_processing(self):
         sp = SentenceProcessing('output/intermediate data for unittest/dicts_and_encoded_texts/', 'output/intermediate data for unittest/edges/', 6)
-        sp.fromfile('/Users/yin/projects/corpus2graph/corpus2graph/output/intermediate data for unittest/dicts_and_encoded_texts/dict_AA_wiki_03.dicloc')
+        sp.fromfile('output/intermediate data for unittest/dicts_and_encoded_texts/dict_AA_wiki_03.dicloc')
         sp.merge_transferred_word_count()
 if __name__ == '__main__':
     unittest.main()
