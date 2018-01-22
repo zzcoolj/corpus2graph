@@ -31,25 +31,25 @@ def long_time_task_for_worker_test(name):
     print('Task %s runs %0.2f seconds.' % (name, (end - start)))
 
 
-def master(files_getter, data_folder, file_extension, worker, process_num=4, **kw):
+def master(files_getter, data_folder, file_extension, worker, process_num=4):
     """
-    Using process_num of processes.
-    In each process, call worker function with parameters kw (a dictionary)
-    to one of file with file_extension in data_folder.
+    Each processor takes one file at one time.
     """
     print('Master process %s.' % os.getpid())
     files = files_getter(data_folder, file_extension)
     file_num = len(files)
-    # Each process deals with one file in the folder
+    if file_num == 0:
+        print('[ERROR] No valid files in the data folder.')
+        exit()
     if file_num < process_num:
+        print('#files less than #processors, change process_num to', str(file_num))
         process_num = file_num
-    p = Pool(process_num)
-    for file in files:
-        p.apply_async(worker, (file, ), kw)
-    print('Waiting for all sub-processes done...')
-    p.close()
-    p.join()
-    print('All sub-processes done.')
+
+    with Pool(process_num) as p:
+        results = p.starmap(worker, zip(files))
+        p.close()
+        p.join()
+        print('All sub-processes done.')
 
 
 def get_files_endswith(data_folder, file_extension):

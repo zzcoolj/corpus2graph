@@ -1,6 +1,7 @@
 __author__ = 'Zheng ZHANG'
 
 import nltk.data
+import os
 nltk.data.path.append("/Users/zzcoolj/Code/NLTK/nltk_data")
 
 
@@ -283,6 +284,13 @@ def write_dict_to_file_value_type_specified(file_path, dictionary, value_type):
             value_str = '\t'.join(value)
             f.write('%s\t%s\n' % (key, value_str))
 
+
+def write_dict_to_file_bis(file_path, dictionary):
+    with open(file_path, 'w', encoding='utf-8') as f:
+        for key, value in dictionary.items():
+            f.write('%s\t%s\n' % (key, value))
+
+
 def read_two_columns_file_to_build_dictionary_type_specified_bis(file, key_type, value_type):
     d = {}
     with open(file, encoding='utf-8') as f:
@@ -292,24 +300,21 @@ def read_two_columns_file_to_build_dictionary_type_specified_bis(file, key_type,
         return d
 
 
-# TESTS
-# randomly_select_lines("/Users/zzcoolj/Code/word2vec/data/questions-words.txt", "word2vec_city_country.txt", 250, 1, ".")
+def get_files_startswith(data_folder, starting):
+    # Reason to add the third condition to verify files' names are not equal to 'word_count_all.txt': In case before
+    # executing the code, dicts_and_encoded_texts_folder folder already has 'word_count_all.txt' file, this function
+    # considers the previous word_count_all file as a normal local dict file.
+    files = [os.path.join(data_folder, name) for name in os.listdir(data_folder)
+             if (os.path.isfile(os.path.join(data_folder, name))
+                 and name.startswith(starting)
+                 and (name != 'word_count_all.txt'))]
+    return files
 
-# print(tokenize_text_into_sentences("/Users/zzcoolj/Code/GoW/data/test.txt"))
 
-# print(tokenize_text_into_words("Before their execution, detainees were brought before a \"military field court\" in the capital's Qaboun district for \"trials\" lasting between one and three minutes, the report says."))
-
-# print(read_two_columns_file_to_build_dictionary("/Users/zzcoolj/Code/BUCC/bucc2017/zh-en/zh-en.training.en"))
-
-# build_translation_file("/Users/zzcoolj/Code/BUCC/bucc2017/zh-en/zh-en.training.zh",
-#                        "/Users/zzcoolj/Code/BUCC/bucc2017/zh-en/zh-en.training.en",
-#                        "/Users/zzcoolj/Code/BUCC/bucc2017/zh-en/zh-en.training.gold",
-#                        "test.txt")
-
-# for test in search_all_specific_nodes_in_xml_known_only_node_name("/Users/zzcoolj/Code/GoW/data/aquaint-2_sample_xin_eng_200512.xml", "P"):
-#     print(test)
-#
-# for test in search_all_specific_nodes_in_xml_known_node_path("/Users/zzcoolj/Code/GoW/data/aquaint-2_sample_xin_eng_200512.xml", "./DOC/TEXT/P"):
-#     print(test)
-
-# print(read_two_columns_file_to_build_dictionary_type_specified('../GoW/data/dicts/dict_xin_eng_200410.dicloc', str, int))
+def read_valid_vocabulary(file_path):
+    result = []
+    with open(file_path) as f:
+        for line in f:
+            line_element = line.rstrip('\n')
+            result.append(line_element)
+    return result
