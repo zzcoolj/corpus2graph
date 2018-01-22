@@ -2,6 +2,10 @@ import unittest
 from corpus2graph.graph_data_provider import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
     SentenceProcessing, WordPairsProcessing
 
+import configparser
+config = configparser.ConfigParser()
+config.read('config.ini')
+
 
 class TestGraphDataProvider(unittest.TestCase):
     """ ATTENTION
@@ -55,14 +59,14 @@ class TestGraphDataProvider(unittest.TestCase):
 
     def test_sentence_processing(self):
         sp = SentenceProcessing(dicts_folder=self.dicts_folder, output_folder=self.edges_folder,
-                                max_window_size=self.max_window_size)
+                                max_window_size=self.max_window_size, local_dict_extension=config['graph']['local_dict_extension'])
         # sp.fromfile(self.dicts_folder + 'dict_AA_wiki_03.dicloc')
         sp.apply(data_folder=self.dicts_folder, process_num=self.process_num)
 
     def test_word_pairs_processing(self):
         wpp = WordPairsProcessing(max_vocab_size=self.max_vocab_size, min_count=self.min_count,
                                   dicts_folder=self.dicts_folder, window_size=self.max_window_size,
-                                  edges_folder=self.edges_folder, graph_folder=self.graph_folder)
+                                  edges_folder=self.edges_folder, graph_folder=self.graph_folder, safe_files_number_per_processor=config['graph']['safe_files_number_per_processor'])
         wpp.apply(process_num=self.process_num)
 
 

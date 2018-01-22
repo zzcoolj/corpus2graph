@@ -6,10 +6,6 @@ from collections import Counter
 from multiprocessing import Pool
 from . import util
 from . import multi_processing
-import configparser
-config = configparser.ConfigParser()
-# TODO config.ini should be in root or corpus2graph folder.
-config.read('config.ini')
 
 """ Attention
 Each time we create a local dictionary, word order will not be the same (word id is identical).
@@ -222,11 +218,12 @@ class WordPairsExtractor(object):
 
 
 class SentenceProcessing(object):
-    def __init__(self, dicts_folder, output_folder, max_window_size):
+    def __init__(self, dicts_folder, output_folder, max_window_size, local_dict_extension):
         self.dicts_folder = dicts_folder
         self.output_folder = output_folder
         self.max_window_size = max_window_size
         self.word_pair_extractor = WordPairsExtractor(max_window_size=max_window_size, type='position')
+        self.local_dict_extension = local_dict_extension
 
     def word_count(self, encoded_text, file_name, local_dict_file_path):
         result = dict(Counter([item for sublist in encoded_text for item in sublist]))
@@ -259,7 +256,6 @@ class SentenceProcessing(object):
 
     def fromfile(self, local_dict_file_path):
         print('Processing file %s (%s)...' % (local_dict_file_path, multi_processing.get_pid()))
-        print(config.sections())
 
         # TODO Put into init or not for speed up
         merged_dict = util.read_two_columns_file_to_build_dictionary_type_specified_bis(
@@ -275,7 +271,7 @@ class SentenceProcessing(object):
         '''
         # Get encoded_text_pickle path according to local_dict_file_path
         local_encoded_text_pickle = local_dict_file_path.replace("dict_", "encoded_text_")[
-                                    :-len(config['graph']['local_dict_extension'])]
+                                    :-len(self.local_dict_extension)]
         local_encoded_text = util.read_pickle(local_encoded_text_pickle + ".pickle")
         # Translate the local encoded text with transfer_dict
         transferred_encoded_text = []
@@ -304,14 +300,14 @@ class SentenceProcessing(object):
     def apply(self, data_folder, process_num):
         multi_processing.master(files_getter=multi_processing.get_files_endswith,
                                 data_folder=data_folder,
-                                file_extension=config['graph']['local_dict_extension'],
+                                file_extension=self.local_dict_extension,
                                 worker=self.fromfile,
                                 process_num=process_num)
         self.merge_transferred_word_count()
 
 
 class WordPairsProcessing(object):
-    def __init__(self, max_vocab_size, min_count, window_size, dicts_folder, edges_folder, graph_folder):
+    def __init__(self, max_vocab_size, min_count, window_size, dicts_folder, edges_folder, graph_folder, safe_files_number_per_processor):
         self.max_vocab_size = max_vocab_size
         self.dicts_folder = dicts_folder
         self.min_count = min_count
@@ -319,6 +315,7 @@ class WordPairsProcessing(object):
         self.edges_folder = edges_folder
         self.graph_folder = graph_folder
         self.valid_vocabulary_path = None
+        self.safe_files_number_per_processor = safe_files_number_per_processor
 
     def write_valid_vocabulary(self):
         # TODO valid_vocabulary should be a dict. No need to write as list and then read list changing to dict.
@@ -390,7 +387,7 @@ class WordPairsProcessing(object):
         def get_counted_edges(files, process_num=process_num):
             # Each thread processes several target edges files and save their counted_edges.
             files_size = len(files)
-            num_tasks = files_size // int(config['graph']['safe_files_number_per_processor'])
+            num_tasks = files_size // int(self.safe_files_number_per_processor)
             if num_tasks < process_num:
                 num_tasks = process_num
             if files_size <= num_tasks:  # extreme case: #files less than #tasks => use only one processor to handle all.
