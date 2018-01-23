@@ -1,6 +1,6 @@
 import unittest
 import warnings
-from corpus2graph.graph_data_provider import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
+from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
     SentenceProcessing, WordPairsProcessing
 
 import configparser
