@@ -2,6 +2,7 @@ __author__ = 'Zheng ZHANG'
 
 import string
 import os
+import warnings
 from collections import Counter
 from multiprocessing import Pool
 from . import util
@@ -33,6 +34,9 @@ class FileParser(object):
     def __init__(self,
                  file_parser='txt',
                  xml_node_path=None):
+        if file_parser not in ['txt', 'xml']:
+            msg = 'file_parser should be txt or xml, not "{file_parser}"'
+            raise ValueError(msg.format(file_parser=file_parser))
         self.file_parser = file_parser
         self.xml_node_path = xml_node_path
 
@@ -59,11 +63,12 @@ class FileParser(object):
 class WordPreprocessor(object):
     # default: config file.
     def __init__(self, remove_numbers = True, remove_punctuations = True,
-                 stem_word = True, lowercase = True):
+                 stem_word = True, lowercase = True, wpreprocessor = None):
         self.remove_numbers = remove_numbers
         self.remove_punctuations = remove_punctuations
         self.stem_word = stem_word
         self.lowercase = lowercase
+        self.wpreprocessor = wpreprocessor
         self.puncs = set(string.punctuation)
 
     def apply(self, word):
@@ -81,30 +86,56 @@ class WordPreprocessor(object):
         if self.lowercase:
             word = word.lower()
 
+        if self.wpreprocessor is not None:
+            if not callable(self.wpreprocessor):
+                msg = 'wpreprocessor should be callable'
+                warnings.warn(msg)
+            else:
+                word = self.wpreprocessor(word)
+                if not isinstance(word, str):
+                    msg = 'The output of wpreprocessor should be string'
+                    raise ValueError(msg)
         return word
+
+    def __call__(self, word):
+        return self.apply(word)
 
 
 class Tokenizer(object):
     # TODO add catch exception for user defined function
-    def __init__(self, word_tokenizer='Treebank'):
+    def __init__(self, word_tokenizer='Treebank', wtokenizer = None):
+        if word_tokenizer not in ['Treebank', 'PunktWord','WordPunct','']:
+            msg = 'word_tokenizer "{word_tokenizer}" should be Treebank, PunktWord, WordPunct or empty'
+            raise ValueError(msg.format(word_tokenizer=word_tokenizer))
         if word_tokenizer == 'Treebank':
             from nltk.tokenize import TreebankWordTokenizer
-            self.tokenizer = TreebankWordTokenizer()
+            self.tokenizer = TreebankWordTokenizer().tokenize
         elif word_tokenizer == 'PunktWord':
             # PunktTokenizer splits on punctuation, but keeps it with the word. => [‘this’, “‘s”, ‘a’, ‘test’]
             from nltk.tokenize import PunktWordTokenizer
-            self.tokenizer = PunktWordTokenizer()
+            self.tokenizer = PunktWordTokenizer().tokenize
         elif word_tokenizer == 'WordPunct':
             # WordPunctTokenizer splits all punctuations into separate tokens. => [‘This’, “‘”, ‘s’, ‘a’, ‘test’]
             from nltk.tokenize import WordPunctTokenizer
-            self.tokenizer = WordPunctTokenizer()
+            self.tokenizer = WordPunctTokenizer().tokenize
         else:
-            self.tokenizer = None
+            if wtokenizer is None:
+                self.tokenizer = None
+            else:
+                if not callable(wtokenizer):
+                    msg = 'wtokenizer should be callable'
+                    warnings.warn(msg)
+                    self.tokenizer = None
+                else:
+                    self.tokenizer = wtokenizer
     def apply(self, text):
         if self.tokenizer is not None:
-            return self.tokenizer.tokenize(text)
+            return self.tokenizer(text)
         else:
-            return text
+            return [text]
+
+    def __call__(self, text):
+        return self.apply(text)
 
 
 class WordProcessing(object):
@@ -181,6 +212,8 @@ class WordProcessing(object):
                                 process_num=process_num)
         self.merge_local_dict()
 
+    def __call__(self, data_folder, process_num):
+        self.apply(data_folder, process_num)
 
 class WordPairsExtractor(object):
 
@@ -216,6 +249,8 @@ class WordPairsExtractor(object):
         else:
             return {}
 
+    def __call__(self, encoded_text, distance):
+        return self.apply(encoded_text, distance)
 
 class SentenceProcessing(object):
     def __init__(self, dicts_folder, output_folder, max_window_size, local_dict_extension):
@@ -304,6 +339,9 @@ class SentenceProcessing(object):
                                 worker=self.fromfile,
                                 process_num=process_num)
         self.merge_transferred_word_count()
+
+    def __call__(self, data_folder, process_num):
+        self.apply(data_folder, process_num)
 
 
 class WordPairsProcessing(object):
@@ -464,6 +502,9 @@ class WordPairsProcessing(object):
     def apply(self, process_num):
         self.write_valid_vocabulary()
         self.multiprocessing_merge_edges_count_of_a_specific_window_size(process_num=process_num)
+
+    def __call__(self, process_num):
+        self.apply(process_num)
 
 
 # def get_index2word(file, key_type=int, value_type=str):

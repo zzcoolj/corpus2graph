@@ -1,4 +1,5 @@
 import unittest
+import warnings
 from corpus2graph.graph_data_provider import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
     SentenceProcessing, WordPairsProcessing
 
@@ -36,6 +37,26 @@ class TestGraphDataProvider(unittest.TestCase):
         result3 = wp.apply('Hello')
         self.assertEqual(result3, 'hello')
 
+        def toto(word):
+            return ''
+
+        wp = WordPreprocessor(remove_numbers = False, remove_punctuations = False,
+                 stem_word = False, lowercase = False, wpreprocessor = toto)
+        result4 = wp.apply('Hello')
+        self.assertEqual(result4, '')
+        with warnings.catch_warnings(record=True) as w:
+            wp = WordPreprocessor(remove_numbers=False, remove_punctuations=False,
+                                  stem_word=False, lowercase=False, wpreprocessor='toto')
+            result5 = wp.apply('Hello')
+            assert "wpreprocessor" in str(w[-1].message)
+
+        def titi(word):
+            return None
+
+        wp = WordPreprocessor(remove_numbers=False, remove_punctuations=False,
+                              stem_word=False, lowercase=False, wpreprocessor=titi)
+        self.assertRaises(ValueError, wp, 'hello')
+
     def test_file_parser(self):
         tfp = FileParser()
         filepath = 'unittest_data/AA/wiki_03.txt'
@@ -45,11 +66,30 @@ class TestGraphDataProvider(unittest.TestCase):
         # TODO test by assertEqual, ('\n' is added to the end of the sentence)
         #self.assertEqual(lines, reflines)
 
+        # TODO problem in test code, no problem in source code
+        #tfp = FileParser('txxt')
+        #self.assertRaises(ValueError, tfp, filepath)
+
+
     def test_tokenizer(self):
         # TODO test PunktWord
         tknizer = Tokenizer(word_tokenizer='WordPunct')
         result = tknizer.apply("this's a test")
         self.assertEqual(result, ['this', "'", "s", 'a', 'test'])
+
+        def mytok(s):
+            return list(s)
+
+        tknizer = Tokenizer(word_tokenizer='', wtokenizer = mytok)
+        self.assertEqual(tknizer('h l'), ['h', ' ', 'l'])
+
+        # tknizer = Tokenizer(word_tokenizer='tree')
+        # tknizer = Tokenizer(word_tokenizer='', wtokenizer='tt')
+        self.assertRaises(ValueError, Tokenizer, 'tree')
+
+        with warnings.catch_warnings(record=True) as w:
+            tknizer = Tokenizer(word_tokenizer='', wtokenizer='tt')
+            assert "wtokenizer" in str(w[-1].message)
 
     # main classes
     def test_word_processing(self):
