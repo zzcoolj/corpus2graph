@@ -64,12 +64,13 @@ class TestGraphDataProvider(unittest.TestCase):
         reflines = ['alfred hitchcock', 'sir alfred joseph hitchcock ( 00 august 0000 – 00 april 0000 ) was '
                                         'an english film director and producer , at times referred to as " the master of suspense " .he pioneered many elements of the suspense and psychological thriller genres .']
         # TODO test by assertEqual, ('\n' is added to the end of the sentence)
+        # TODO test xml and txt parser
+        # TODO NOW user defined parser function
         #self.assertEqual(lines, reflines)
 
         # TODO problem in test code, no problem in source code
-        #tfp = FileParser('txxt')
-        #self.assertRaises(ValueError, tfp, filepath)
-
+        # tfp = FileParser('txxt')
+        # self.assertRaises(ValueError, tfp, filepath)
 
     def test_tokenizer(self):
         # TODO test PunktWord
