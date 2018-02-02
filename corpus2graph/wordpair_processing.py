@@ -16,9 +16,6 @@ class WordPairsProcessing(object):
         self.safe_files_number_per_processor = safe_files_number_per_processor
 
     def write_valid_vocabulary(self):
-        # TODO valid_vocabulary should be a dict. No need to write as list and then read list changing to dict.
-        # TODO LATER maybe it's not the fastest way to sort dict.
-
         if (self.max_vocab_size == 'None') or (not self.max_vocab_size):
             self.valid_vocabulary_path = self.dicts_folder + 'valid_vocabulary_min_count_' + self.min_count + '.txt'
         else:
@@ -36,6 +33,7 @@ class WordPairsProcessing(object):
                 valid_word_count[word_id] = count
         if self.max_vocab_size and (self.max_vocab_size != 'None'):
             if int(self.max_vocab_size) < len(valid_word_count):
+                # TODO Zheng sort by value and then by key: change valid_word_count to tuple
                 valid_vocabulary = list(sorted(valid_word_count, key=valid_word_count.get, reverse=True))[
                                    :int(self.max_vocab_size)]
             else:

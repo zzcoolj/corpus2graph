@@ -41,21 +41,6 @@ def tokenize_text_into_sentences(file):
     return tokenizer.tokenize(data)
 
 
-def tokenize_paragraph_into_sentences(paragraph):
-    # TODO Attention:
-    """
-    It works for paragraph like:
-        and "Down with Japanese imperialism". The movement then spread to other parts of China
-    But does not work for:
-        and "Down with Japanese imperialism".The movement then spread to other parts of China
-    It needs "." comes with a space
-    """
-
-    # Tokenize Punkt module has many pre-trained tokenize model for many european languages.
-    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-    return tokenizer.tokenize(paragraph)
-
-
 def tokenize_informal_paragraph_into_sentences(paragraph):
     # TODO Using Pierre's slide to make replacement rule more accurate
     paragraph = paragraph.replace(".", ". ")

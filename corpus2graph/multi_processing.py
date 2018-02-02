@@ -99,17 +99,9 @@ def get_file_folder(path):
 def worker_test(file):
     print('Processing file %s (%s)...' % (file, os.getpid()))
 
-    # TODO Reducer
-    # TODO dictionary fusion: same word may have different id in different dictionaries
-    # TODO Which words are UNK could be defined later in dictionary
-    # TODO Update/Or just share the final dictionary edge files from window_size=2 to window_size=max_window_size
-    # TODO Construct graph
-
-
 # TESTS
 # master("/Users/zzcoolj/Code/bucc2017/zh-en", ".en", worker_test)
 # print(get_file_name("/Users/zzcoolj/Code/GoW/data/xin_eng/xin_eng_200410.xml"))
-
 
 def chunkify(lst, n):
     """

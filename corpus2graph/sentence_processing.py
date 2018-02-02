@@ -11,6 +11,9 @@ class SentenceProcessing(object):
         self.max_window_size = max_window_size
         self.word_pair_extractor = WordPairsExtractor(max_window_size=max_window_size, type='position')
         self.local_dict_extension = local_dict_extension
+        self.merged_dict = util.read_two_columns_file_to_build_dictionary_type_specified_bis(
+            file=dicts_folder + '/dict_merged.txt', key_type=str,
+            value_type=int)
 
     def word_count(self, encoded_text, file_name, local_dict_file_path):
         result = dict(Counter([item for sublist in encoded_text for item in sublist]))
@@ -33,7 +36,7 @@ class SentenceProcessing(object):
         return transfer_dict
 
     def write_edges_of_different_window_size(self, encoded_text, file_basename):
-        edges = self.word_pair_extractor.apply(encoded_text, file_basename)
+        edges = self.word_pair_extractor(encoded_text, file_basename)
         # Write edges to files
         if not self.output_folder.endswith('/'):
             self.output_folder += '/'
@@ -44,12 +47,8 @@ class SentenceProcessing(object):
     def fromfile(self, local_dict_file_path):
         print('Processing file %s (%s)...' % (local_dict_file_path, multi_processing.get_pid()))
 
-        # TODO Put into init or not for speed up
-        merged_dict = util.read_two_columns_file_to_build_dictionary_type_specified_bis(
-            file=multi_processing.get_file_folder(local_dict_file_path) + '/dict_merged.txt', key_type=str,
-            value_type=int)
         local_dict = util.read_two_columns_file_to_build_dictionary_type_specified_bis(local_dict_file_path, str, int)
-        transfer_dict = self.get_transfer_dict_for_local_dict(local_dict, merged_dict)
+        transfer_dict = self.get_transfer_dict_for_local_dict(local_dict, self.merged_dict)
         '''
         Local dict and local encoded text must be in the same folder,
         and their names should be look like below:
@@ -75,14 +74,22 @@ class SentenceProcessing(object):
         self.write_edges_of_different_window_size(transferred_encoded_text, file_name)
 
     def merge_transferred_word_count(self):
-        # TODO LATER too slow, improve this part
+        # TODO NOW Zheng multiprocessing
+        def sum_counter(l):
+            if len(l) == 1:
+                return Counter(util.read_two_columns_file_to_build_dictionary_type_specified(l[0], int, int))
+            else:
+                mid = len(l) // 2
+                return sum_counter(l[:mid]) + sum_counter(l[mid:])
+
         files = util.get_files_startswith(self.dicts_folder, "word_count_")
-        c = Counter()
-        for file in files:
-            counter_temp = util.read_two_columns_file_to_build_dictionary_type_specified(file, int, int)
-            c += counter_temp
-        util.write_dict_to_file(self.dicts_folder + "word_count_all.txt", dict(c), 'str')
-        return dict(c)
+        return dict(sum_counter(files))
+        # c = Counter()
+        # for file in files:
+        #     counter_temp = util.read_two_columns_file_to_build_dictionary_type_specified(file, int, int)
+        #     c += counter_temp
+        # util.write_dict_to_file(self.dicts_folder + "word_count_all.txt", dict(c), 'str')
+        # return dict(c)
 
     def apply(self, data_folder, process_num):
         multi_processing.master(files_getter=multi_processing.get_files_endswith,

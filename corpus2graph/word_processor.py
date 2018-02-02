@@ -29,7 +29,6 @@ class FileParser(object):
         if self.file_parser == 'xml':
             for sent in self.xml_parser(file_path, self.xml_node_path):
                 yield sent
-        # TODO no file_path check, what if user enters 'txxt'
 
 
 class WordPreprocessor(object):
@@ -74,7 +73,6 @@ class WordPreprocessor(object):
 
 
 class Tokenizer(object):
-    # TODO add catch exception for user defined function
     def __init__(self, word_tokenizer='Treebank', wtokenizer = None):
         if word_tokenizer not in ['Treebank', 'PunktWord','WordPunct','']:
             msg = 'word_tokenizer "{word_tokenizer}" should be Treebank, PunktWord, WordPunct or empty'

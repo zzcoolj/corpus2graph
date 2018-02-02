@@ -151,7 +151,7 @@ if __name__ == '__main__':
     # multiprocessing_merge_edges_count_of_a_specific_window_size(edges_folder='data/edges/', window_size=4, output_folder='data/')
 
     # txt
-    # TODO NOW check the guess below
+    # TODO LATER Zheng check the guess below
     '''
     If intermediate data remains unchanged, running multiprocessing_merge_edges_count_of_a_specific_window_size several
     times won't change the result: only the line order in the encoded edges file changed.
@@ -176,5 +176,4 @@ if __name__ == '__main__':
         file_path = config['graph']['graph_folder'] + 'encoded_edges_count_window_size_' + str(i) + '.txt'
         merge_encoded_edges_count_for_undirected_graph(old_encoded_edges_count_path=file_path)
 
-# TODO LATER Add weight according to word pair distance in write_edges_of_different_window_size function
-# TODO NOW This program now allows self-loop, add one option for that.
+# TODO LATER Zheng Add weight according to word pair distance in write_edges_of_different_window_size function

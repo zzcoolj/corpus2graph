@@ -12,7 +12,7 @@ class WordProcessing(object):
         self.output_folder = output_folder
         # TODO create relevant folder inside output_folder
         self.file_parser = FileParser(file_parser=file_parser, xml_node_path=xml_node_path)
-        # TODO NOW no name check for file_parser
+        # TODO NOW Ruiqing user defined file_parser yield type check
         self.file_extension = file_parser
         self.word_preprocessor = WordPreprocessor(remove_numbers=remove_numbers,
                                                   remove_punctuations=remove_punctuations,

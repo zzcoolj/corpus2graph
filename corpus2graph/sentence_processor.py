@@ -6,7 +6,6 @@ class WordPairsExtractor(object):
         self.type = type
 
     def position_based(self, encoded_text):
-        # TODO change to yield
         edges = {}
 
         # Construct edges
