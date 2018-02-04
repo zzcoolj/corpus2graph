@@ -5,12 +5,16 @@ from . import util
 class FileParser(object):
     def __init__(self,
                  file_parser='txt',
-                 xml_node_path=None):
-        if file_parser not in ['txt', 'xml']:
-            msg = 'file_parser should be txt or xml, not "{file_parser}"'
+                 xml_node_path=None, fparser=None):
+        if file_parser not in ['txt', 'xml', 'defined']:
+            msg = 'file_parser should be txt, xml or defined, not "{file_parser}"'
             raise ValueError(msg.format(file_parser=file_parser))
+        if file_parser == 'defined' and fparser is None:
+            msg = 'Please define you own file_parser.'
+            raise ValueError(msg)
         self.file_parser = file_parser
         self.xml_node_path = xml_node_path
+        self.fparser = fparser
 
     def xml_parser(self, file_path, xml_node_path):
         for paragraph in util.search_all_specific_nodes_in_xml_known_node_path(file_path, xml_node_path):
@@ -29,7 +33,9 @@ class FileParser(object):
         if self.file_parser == 'xml':
             for sent in self.xml_parser(file_path, self.xml_node_path):
                 yield sent
-
+        if self.file_parser == 'defined':
+            for sent in self.fparser(file_path):
+                yield sent
 
 class WordPreprocessor(object):
     # default: config file.
