@@ -72,6 +72,20 @@ class TestGraphDataProvider(unittest.TestCase):
         # tfp = FileParser('txxt')
         # self.assertRaises(ValueError, tfp, filepath)
 
+        #self.assertRaises(ValueError, FileParser(file_parser='defined',
+        #                xml_node_path=None, fparser=None), filepath)
+
+        def txt_parser(file_path):
+            with open(file_path, 'r', encoding='utf-8') as file:
+                for line in file:
+                    yield line
+
+        tfp = FileParser(file_parser='defined',
+                        xml_node_path=None, fparser=txt_parser)
+        filepath = 'unittest_data/AA/wiki_03.txt'
+        lines = list(tfp(filepath))
+        #print(lines)
+
     def test_tokenizer(self):
         # TODO test PunktWord
         tknizer = Tokenizer(word_tokenizer='WordPunct')
