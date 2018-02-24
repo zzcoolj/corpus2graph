@@ -8,14 +8,11 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import configparser
-import corpus2graph.graph_data_provider as gdp
-import sys
-sys.path.insert(0, '../common/')
-import corpus2graph.util
+import corpus2graph.util as util
 import corpus2graph.multi_processing
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('../test/config.ini')
 
 
 class NoGraph:
@@ -30,7 +27,7 @@ class NoGraph:
             3. graph_index2wordId represents cooccurrence_matrix element's order
         """
         self.name_prefix = corpus2graph.multi_processing.get_file_name(encoded_edges_count_file_path).split('.')[0]
-        valid_wordId = list(set(gdp.read_valid_vocabulary(valid_vocabulary_path)))  # make sure no duplication
+        valid_wordId = list(set(util.read_valid_vocabulary(valid_vocabulary_path)))  # make sure no duplication
         # ATTENTION: graph_index2wordId should be a list of which the index order is from 0 to vocab_size-1
         # TODO LATER No need to make graph_index2wordId an int list. Find where graph_index2wordId is needed and changed them.
         self.graph_index2wordId = list(map(int, valid_wordId))
@@ -48,7 +45,7 @@ class NoGraph:
             cooccurrence_matrix[graph_wordId2index[target]][graph_wordId2index[source]] = weight
         self.cooccurrence_matrix = cooccurrence_matrix
 
-    def get_stochastic_matrix(self, power=None):
+    def get_stochastic_matrix(self, remove_self_loops, power=None):
         """
         A replacement of get_stochastic_matrix function NXGraph class.
         """
@@ -58,28 +55,29 @@ class NoGraph:
         if power:
             stochastic_matrix = np.power(stochastic_matrix, power)
         # remove self loop
-        for i in range(vocab_size):
-            stochastic_matrix[i][i] = 0
+        if remove_self_loops:
+            for i in range(vocab_size):
+                stochastic_matrix[i][i] = 0
         # calculate percentage
         matrix_sum_row = np.sum(stochastic_matrix, axis=1, keepdims=True)  # sum of each row and preserve the dimension
         stochastic_matrix /= matrix_sum_row
         return stochastic_matrix
 
-    def one_to_t_step_random_walk_stochastic_matrix_yielder(self, t):
+    def one_to_t_step_random_walk_stochastic_matrix_yielder(self, t, remove_self_loops):
         """
         Instead of getting a specific t step random walk result, this method gets a dict of result from 1 step random
         walk to t step random walk. This method should be used for grid search.
         """
-        transition_matrix = self.get_stochastic_matrix()
+        transition_matrix = self.get_stochastic_matrix(remove_self_loops)
         result = transition_matrix
         for t in range(1, t+1):
             if t != 1:
                 result = np.matmul(result, transition_matrix)
             yield result, t
 
-    def get_t_step_random_walk_stochastic_matrix(self, t, output_folder=None):
+    def get_t_step_random_walk_stochastic_matrix(self, t, remove_self_loops, output_folder=None):
         # TODO NOW not the same result from 1 step random walk
-        transition_matrix = self.get_stochastic_matrix()
+        transition_matrix = self.get_stochastic_matrix(remove_self_loops)
         result = transition_matrix
         while t > 1:
             result = np.matmul(result, transition_matrix)
@@ -105,8 +103,7 @@ class NXGraph:
         return cls(graph, name_prefix, nx.is_directed(graph))
 
     @classmethod
-    def from_encoded_edges_count_file(cls, path, directed=config.getboolean("graph", "directed"),
-                                      output_folder=config['graph']['graph_folder']):
+    def from_encoded_edges_count_file(cls, path, directed=config.getboolean("graph", "directed")):
         name_prefix = corpus2graph.multi_processing.get_file_name(path).split('.')[0]
         if directed:
             graph = nx.read_weighted_edgelist(path, create_using=nx.DiGraph(), nodetype=int)
@@ -147,47 +144,46 @@ class NXGraph:
                 round(nx.average_clustering(self.graph, weight=None), 2)))
         print('###############################################################\n')
 
-    def log_edges_count(self):
-        # TODO NOW maybe could be repalced in make_cum_matrix part
-        pass
+    # def get_shortest_path_lengths_between_all_nodes(self, output_folder):
+    #     """
+    #     From test, these three algorithms below take more than 20 hours (processes have been killed after 20 hours) to
+    #     calculate.
+    #     'floyd_warshall_numpy' takes around 100 minutes to get the result.
+    #
+    #     # length1 = dict(nx.all_pairs_dijkstra_path_length(g))
+    #     # length2 = dict(nx.all_pairs_bellman_ford_path_length(g))
+    #     # length3 = nx.johnson(g, weight='weight')
+    #     # for node in [0, 1, 2, 3, 4]:
+    #     #     print('1 - {}: {}'.format(node, length2[1][node]))
+    #     """
+    #     """ ATTENTION
+    #     'floyd_warshall_numpy' has already considered situations below:
+    #     1. If there's no path between source and target node, matrix will put 'inf'
+    #     2. No matter how much the weight is between node and node itself(self loop), the shortest path will always be 0.
+    #     """
+    #     matrix = nx.floyd_warshall_numpy(self.graph)  # ATTENTION: return type is NumPy matrix not NumPy ndarray.
+    #     # ATTENTION: after saving, NumPy matrix has been changed to 2darray.
+    #     np.save(output_folder + self.name_prefix + '_matrix.npy', matrix, fix_imports=False)
+    #     corpus2graph.util.write_to_pickle(self.graph.nodes(), output_folder + self.name_prefix + '_nodes.pickle')
+    #     return self.graph.nodes(), matrix
 
-    def get_shortest_path_lengths_between_all_nodes(self, output_folder):
-        """
-        From test, these three algorithms below take more than 20 hours (processes have been killed after 20 hours) to
-        calculate.
-        'floyd_warshall_numpy' takes around 100 minutes to get the result.
-
-        # length1 = dict(nx.all_pairs_dijkstra_path_length(g))
-        # length2 = dict(nx.all_pairs_bellman_ford_path_length(g))
-        # length3 = nx.johnson(g, weight='weight')
-        # for node in [0, 1, 2, 3, 4]:
-        #     print('1 - {}: {}'.format(node, length2[1][node]))
-        """
-        """ ATTENTION
-        'floyd_warshall_numpy' has already considered situations below:
-        1. If there's no path between source and target node, matrix will put 'inf'
-        2. No matter how much the weight is between node and node itself(self loop), the shortest path will always be 0.
-        """
-        matrix = nx.floyd_warshall_numpy(self.graph)  # ATTENTION: return type is NumPy matrix not NumPy ndarray.
-        # ATTENTION: after saving, NumPy matrix has been changed to 2darray.
-        np.save(output_folder + self.name_prefix + '_matrix.npy', matrix, fix_imports=False)
-        corpus2graph.util.write_to_pickle(self.graph.nodes(), output_folder + self.name_prefix + '_nodes.pickle')
-        return self.graph.nodes(), matrix
-
-    def __get_stochastic_matrix(self):
+    def get_stochastic_matrix(self, remove_self_loops):
         # ATTENTION: for a big graph, this method consumes too much memory and calculation time.
-        self.graph.remove_edges_from(list(nx.selfloop_edges(self.graph)))  # remove self loop
+        # ATTENTION: it's really important to copy copy graph. If not, in remove_self_loops=True situation, self-loops
+        # will be permanently deleted.
+        graph_copy = self.graph.copy()
+        if remove_self_loops:
+            graph_copy.remove_edges_from(list(nx.selfloop_edges(graph_copy)))  # remove self loop
         if self.directed:
-            directed_graph = self.graph
+            directed_graph = graph_copy
         else:
-            directed_graph = self.graph.to_directed()
+            directed_graph = graph_copy.to_directed()
         # this function only works with directed graph
         stochastic_graph = nx.stochastic_graph(directed_graph, weight='weight')
         return nx.to_numpy_matrix(stochastic_graph)
 
-    def get_t_step_random_walk_stochastic_matrix(self, t, output_folder=None):
-        # TODO LATER not the same result from 1 step random walk
-        transition_matrix = self.__get_stochastic_matrix()
+    def get_t_step_random_walk_stochastic_matrix(self, t, remove_self_loops, output_folder=None):
+        transition_matrix = self.get_stochastic_matrix(remove_self_loops=remove_self_loops)
         result = transition_matrix
         while t > 1:
             result = np.matmul(result, transition_matrix)
@@ -198,12 +194,12 @@ class NXGraph:
             corpus2graph.util.write_to_pickle(self.graph.nodes(), file_prefix + '_step_rw_nodes.pickle')
         return self.graph.nodes(), result
 
-    def one_to_t_step_random_walk_stochastic_matrix_yielder(self, t):
+    def one_to_t_step_random_walk_stochastic_matrix_yielder(self, t, remove_self_loops):
         """
         Instead of getting a specific t step random walk result, this method gets a dict of result from 1 step random
         walk to t step random walk. This method should be used for grid search.
         """
-        transition_matrix = self.__get_stochastic_matrix()
+        transition_matrix = self.get_stochastic_matrix(remove_self_loops)
         result = transition_matrix
         for t in range(1, t+1):
             if t != 1:
