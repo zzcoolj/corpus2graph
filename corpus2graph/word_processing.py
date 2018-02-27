@@ -6,9 +6,9 @@ from .word_processor import FileParser, WordPreprocessor, Tokenizer
 
 class WordProcessing(object):
     def __init__(self, output_folder, file_parser='txt',
-                 xml_node_path=None, word_tokenizer='WordPunct',
+                 xml_node_path=None, word_tokenizer='WordPunct', wtokenizer=None,
                  remove_numbers=True, remove_punctuations=True,
-                 stem_word=True, lowercase=True):
+                 stem_word=True, lowercase=True, wpreprocessor = None):
         self.output_folder = output_folder
         # TODO create relevant folder inside output_folder
         self.file_parser = FileParser(file_parser=file_parser, xml_node_path=xml_node_path)
@@ -16,8 +16,9 @@ class WordProcessing(object):
         self.file_extension = file_parser
         self.word_preprocessor = WordPreprocessor(remove_numbers=remove_numbers,
                                                   remove_punctuations=remove_punctuations,
-                                                  stem_word=stem_word, lowercase=lowercase)
-        self.tokenizer = Tokenizer(word_tokenizer=word_tokenizer)
+                                                  stem_word=stem_word, lowercase=lowercase,
+                                                  wpreprocessor=wpreprocessor)
+        self.tokenizer = Tokenizer(word_tokenizer=word_tokenizer, wtokenizer=wtokenizer)
 
     def fromfile(self, file_path):
         print('Processing file %s (%s)...' % (file_path, multi_processing.get_pid()))
