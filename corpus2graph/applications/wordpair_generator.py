@@ -1,3 +1,4 @@
+__author__ = 'Ruiqing YIN'
 
 import os
 from .. import util
@@ -18,7 +19,6 @@ class WordsGenerator(object):
                                                   remove_punctuations=remove_punctuations,
                                                   stem_word=stem_word, lowercase=lowercase)
         self.tokenizer = Tokenizer(word_tokenizer=word_tokenizer)
-
 
     def fromsent(self, sent):
         sentence_len = len(sent)
@@ -50,7 +50,6 @@ class WordsGenerator(object):
         for f in files:
             for pair in self.fromfile(f):
                 yield pair
-
 
     def __call__(self, data_folder):
         for pair in self.apply(data_folder):
