@@ -23,7 +23,7 @@ class WordPairsProcessing(object):
                 self.min_count) + '_vocab_size_' + str(
                 self.max_vocab_size) + '.txt'
 
-        merged_word_count = util.read_two_columns_file_to_build_dictionary_type_specified_bis(
+        merged_word_count = util.read_two_columns_file_to_build_dictionary_type_specified(
             file=self.dicts_folder + 'word_count_all.txt',
             key_type=str, value_type=int)
 
@@ -41,7 +41,7 @@ class WordPairsProcessing(object):
         else:
             valid_vocabulary = list(valid_word_count.keys())
 
-        util.write_simple_list_to_file(self.valid_vocabulary_path, valid_vocabulary)
+        util.write_simple_list(self.valid_vocabulary_path, valid_vocabulary)
         return valid_vocabulary
 
     def get_counted_edges_worker(self, edges_files_paths):
@@ -152,8 +152,8 @@ class WordPairsProcessing(object):
             else:
                 # counted edges of window size n (n>=3) = counted edges of window size n-1 + counted edges of distance n
                 counted_edges_of_specific_window_size += counted_edges_of_distance_i
-            util.write_dict_to_file(self.graph_folder + "encoded_edges_count_window_size_" + str(i) + ".txt",
-                                    counted_edges_of_specific_window_size, 'tuple')
+            util.write_dict_type_specified(self.graph_folder + "encoded_edges_count_window_size_" + str(i) + ".txt",
+                                           counted_edges_of_specific_window_size, 'tuple')
 
         return counted_edges_of_specific_window_size
 

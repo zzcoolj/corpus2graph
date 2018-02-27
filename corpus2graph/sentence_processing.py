@@ -11,14 +11,14 @@ class SentenceProcessing(object):
         self.max_window_size = max_window_size
         self.word_pair_extractor = WordPairsExtractor(max_window_size=max_window_size, type='position')
         self.local_dict_extension = local_dict_extension
-        self.merged_dict = util.read_two_columns_file_to_build_dictionary_type_specified_bis(
+        self.merged_dict = util.read_two_columns_file_to_build_dictionary_type_specified(
             file=dicts_folder + '/dict_merged.txt', key_type=str,
             value_type=int)
 
     def word_count(self, encoded_text, file_name, local_dict_file_path):
         result = dict(Counter([item for sublist in encoded_text for item in sublist]))
         folder_name = multi_processing.get_file_folder(local_dict_file_path)
-        util.write_dict_to_file(folder_name + "/word_count_" + file_name + ".txt", result, 'str')
+        util.write_dict_type_specified(folder_name + "/word_count_" + file_name + ".txt", result, 'str')
         return result
 
     def get_transfer_dict_for_local_dict(self, local_dict, merged_dict):
@@ -41,13 +41,13 @@ class SentenceProcessing(object):
         if not self.output_folder.endswith('/'):
             self.output_folder += '/'
         for i in range(2, self.max_window_size + 1):
-            util.write_list_to_file(
+            util.write_list_of_tuple(
                 self.output_folder + file_basename + "_encoded_edges_distance_{0}.txt".format(i), edges[i])
 
     def fromfile(self, local_dict_file_path):
         print('Processing file %s (%s)...' % (local_dict_file_path, multi_processing.get_pid()))
 
-        local_dict = util.read_two_columns_file_to_build_dictionary_type_specified_bis(local_dict_file_path, str, int)
+        local_dict = util.read_two_columns_file_to_build_dictionary_type_specified(local_dict_file_path, str, int)
         transfer_dict = self.get_transfer_dict_for_local_dict(local_dict, self.merged_dict)
         '''
         Local dict and local encoded text must be in the same folder,
@@ -88,7 +88,7 @@ class SentenceProcessing(object):
         # for file in files:
         #     counter_temp = util.read_two_columns_file_to_build_dictionary_type_specified(file, int, int)
         #     c += counter_temp
-        # util.write_dict_to_file(self.dicts_folder + "word_count_all.txt", dict(c), 'str')
+        # util.write_dict_type_specified(self.dicts_folder + "word_count_all.txt", dict(c), 'str')
         # return dict(c)
 
     def apply(self, data_folder, process_num):

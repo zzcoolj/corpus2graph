@@ -1,5 +1,6 @@
 import warnings
 
+
 class WordPairsExtractor(object):
     def __init__(self, max_window_size, type='position'):
         self.max_window_size = max_window_size

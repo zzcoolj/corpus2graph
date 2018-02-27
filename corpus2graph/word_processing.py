@@ -47,7 +47,7 @@ class WordProcessing(object):
         util.write_to_pickle(encoded_text,
                              self.output_folder + "encoded_text_" + parent_folder_name + "_" + file_basename + ".pickle")
         # Write the dictionary
-        util.write_dict_to_file_bis(self.output_folder + "dict_" + parent_folder_name + "_" + file_basename + ".dicloc", word2id)
+        util.write_dict(self.output_folder + "dict_" + parent_folder_name + "_" + file_basename + ".dicloc", word2id)
 
     def merge_local_dict(self):
         def read_first_column_file_to_build_set(file):
@@ -67,7 +67,7 @@ class WordProcessing(object):
             all_keys |= read_first_column_file_to_build_set(file)
 
         result = dict(zip(all_keys, range(len(all_keys))))
-        util.write_dict_to_file_bis(self.output_folder + 'dict_merged.txt', result)
+        util.write_dict(self.output_folder + 'dict_merged.txt', result)
         return result
 
     def apply(self, data_folder, process_num):

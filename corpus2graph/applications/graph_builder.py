@@ -144,29 +144,6 @@ class NXGraph:
                 round(nx.average_clustering(self.graph, weight=None), 2)))
         print('###############################################################\n')
 
-    # def get_shortest_path_lengths_between_all_nodes(self, output_folder):
-    #     """
-    #     From test, these three algorithms below take more than 20 hours (processes have been killed after 20 hours) to
-    #     calculate.
-    #     'floyd_warshall_numpy' takes around 100 minutes to get the result.
-    #
-    #     # length1 = dict(nx.all_pairs_dijkstra_path_length(g))
-    #     # length2 = dict(nx.all_pairs_bellman_ford_path_length(g))
-    #     # length3 = nx.johnson(g, weight='weight')
-    #     # for node in [0, 1, 2, 3, 4]:
-    #     #     print('1 - {}: {}'.format(node, length2[1][node]))
-    #     """
-    #     """ ATTENTION
-    #     'floyd_warshall_numpy' has already considered situations below:
-    #     1. If there's no path between source and target node, matrix will put 'inf'
-    #     2. No matter how much the weight is between node and node itself(self loop), the shortest path will always be 0.
-    #     """
-    #     matrix = nx.floyd_warshall_numpy(self.graph)  # ATTENTION: return type is NumPy matrix not NumPy ndarray.
-    #     # ATTENTION: after saving, NumPy matrix has been changed to 2darray.
-    #     np.save(output_folder + self.name_prefix + '_matrix.npy', matrix, fix_imports=False)
-    #     corpus2graph.util.write_to_pickle(self.graph.nodes(), output_folder + self.name_prefix + '_nodes.pickle')
-    #     return self.graph.nodes(), matrix
-
     def get_stochastic_matrix(self, remove_self_loops):
         # ATTENTION: for a big graph, this method consumes too much memory and calculation time.
         # ATTENTION: it's really important to copy copy graph. If not, in remove_self_loops=True situation, self-loops
@@ -205,3 +182,26 @@ class NXGraph:
             if t != 1:
                 result = np.matmul(result, transition_matrix)
             yield result, t
+
+    # def get_shortest_path_lengths_between_all_nodes(self, output_folder):
+    #     """
+    #     From test, these three algorithms below take more than 20 hours (processes have been killed after 20 hours) to
+    #     calculate.
+    #     'floyd_warshall_numpy' takes around 100 minutes to get the result.
+    #
+    #     # length1 = dict(nx.all_pairs_dijkstra_path_length(g))
+    #     # length2 = dict(nx.all_pairs_bellman_ford_path_length(g))
+    #     # length3 = nx.johnson(g, weight='weight')
+    #     # for node in [0, 1, 2, 3, 4]:
+    #     #     print('1 - {}: {}'.format(node, length2[1][node]))
+    #     """
+    #     """ ATTENTION
+    #     'floyd_warshall_numpy' has already considered situations below:
+    #     1. If there's no path between source and target node, matrix will put 'inf'
+    #     2. No matter how much the weight is between node and node itself(self loop), the shortest path will always be 0.
+    #     """
+    #     matrix = nx.floyd_warshall_numpy(self.graph)  # ATTENTION: return type is NumPy matrix not NumPy ndarray.
+    #     # ATTENTION: after saving, NumPy matrix has been changed to 2darray.
+    #     np.save(output_folder + self.name_prefix + '_matrix.npy', matrix, fix_imports=False)
+    #     corpus2graph.util.write_to_pickle(self.graph.nodes(), output_folder + self.name_prefix + '_nodes.pickle')
+    #     return self.graph.nodes(), matrix

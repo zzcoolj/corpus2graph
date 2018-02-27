@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from corpus2graph.applications import graph_builder as gb
-from corpus2graph.util import read_two_columns_file_to_build_dictionary_type_specified_bis
+from corpus2graph.util import read_two_columns_file_to_build_dictionary_type_specified
 
 
 class TestGraphBuilder(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestGraphBuilder(unittest.TestCase):
     # undirected paths
     encoded_edges_count_undirected_file = 'encoded_edges_count_window_size_6_vocab_size_none_undirected_for_unittest.txt'
     merged_dict_undirected_file = 'dict_merged_undirected_for_unittest.txt'
-    word2wordId_undirected = read_two_columns_file_to_build_dictionary_type_specified_bis(
+    word2wordId_undirected = read_two_columns_file_to_build_dictionary_type_specified(
         file=data_folder + merged_dict_undirected_file, key_type=str, value_type=int)
     valid_vocabulary_undirected_file = 'valid_vocabulary_min_count_5_undirected.txt'
 
