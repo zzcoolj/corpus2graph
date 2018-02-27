@@ -2,6 +2,7 @@ import string
 import warnings
 from . import util
 
+
 class FileParser(object):
     def __init__(self,
                  file_parser='txt',
@@ -79,8 +80,8 @@ class WordPreprocessor(object):
 
 
 class Tokenizer(object):
-    def __init__(self, word_tokenizer='Treebank', wtokenizer = None):
-        if word_tokenizer not in ['Treebank', 'PunktWord','WordPunct','']:
+    def __init__(self, word_tokenizer='Treebank', wtokenizer=None):
+        if word_tokenizer not in ['Treebank', 'PunktWord', 'WordPunct', '']:
             msg = 'word_tokenizer "{word_tokenizer}" should be Treebank, PunktWord, WordPunct or empty'
             raise ValueError(msg.format(word_tokenizer=word_tokenizer))
         if word_tokenizer == 'Treebank':
@@ -104,6 +105,7 @@ class Tokenizer(object):
                     self.tokenizer = None
                 else:
                     self.tokenizer = wtokenizer
+
     def apply(self, text):
         if self.tokenizer is not None:
             return self.tokenizer(text)
