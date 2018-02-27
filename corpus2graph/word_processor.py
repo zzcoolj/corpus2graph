@@ -38,10 +38,11 @@ class FileParser(object):
             for sent in self.fparser(file_path):
                 yield sent
 
+
 class WordPreprocessor(object):
     # default: config file.
-    def __init__(self, remove_numbers = True, remove_punctuations = True,
-                 stem_word = True, lowercase = True, wpreprocessor = None):
+    def __init__(self, remove_numbers=True, remove_punctuations=True,
+                 stem_word=True, lowercase=True, wpreprocessor=None):
         self.remove_numbers = remove_numbers
         self.remove_punctuations = remove_punctuations
         self.stem_word = stem_word
@@ -80,6 +81,9 @@ class WordPreprocessor(object):
 
 
 class Tokenizer(object):
+    def mytok(s):
+        return s.split()
+
     def __init__(self, word_tokenizer='Treebank', wtokenizer=None):
         if word_tokenizer not in ['Treebank', 'PunktWord', 'WordPunct', '']:
             msg = 'word_tokenizer "{word_tokenizer}" should be Treebank, PunktWord, WordPunct or empty'

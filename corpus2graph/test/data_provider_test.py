@@ -109,9 +109,7 @@ class TestGraphDataProvider(unittest.TestCase):
     # main classes
     def test_word_processing(self):
         # TODO NOW [urgent] how to transfer user defined word_tokenizer (no place for wtokenizer=mytok parameter)
-        def mytok(s):
-            return list(s)
-        wp = WordProcessing(output_folder=self.dicts_folder, word_tokenizer='PunktWord',
+        wp = WordProcessing(output_folder=self.dicts_folder, word_tokenizer='', wtokenizer=Tokenizer.mytok,
                             remove_numbers=False, remove_punctuations=False, stem_word=False, lowercase=False)
         # wp.fromfile(self.data_folder + 'AA/wiki_03.txt')
         wp.apply(data_folder=self.data_folder, process_num=self.process_num)

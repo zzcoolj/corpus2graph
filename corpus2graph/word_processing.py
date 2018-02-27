@@ -8,7 +8,7 @@ class WordProcessing(object):
     def __init__(self, output_folder, file_parser='txt',
                  xml_node_path=None, word_tokenizer='WordPunct', wtokenizer=None,
                  remove_numbers=True, remove_punctuations=True,
-                 stem_word=True, lowercase=True, wpreprocessor = None):
+                 stem_word=True, lowercase=True, wpreprocessor=None):
         self.output_folder = output_folder
         # TODO create relevant folder inside output_folder
         self.file_parser = FileParser(file_parser=file_parser, xml_node_path=xml_node_path)
