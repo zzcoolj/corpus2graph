@@ -77,7 +77,7 @@ class WordProcessing(object):
                                 file_extension=self.file_extension,
                                 worker=self.fromfile,
                                 process_num=process_num)
-        self.merge_local_dict()
+        return self.merge_local_dict()
 
     def __call__(self, data_folder, process_num):
         self.apply(data_folder, process_num)

@@ -4,8 +4,10 @@ from multiprocessing import Pool
 from . import util
 from . import multi_processing
 
+
 class WordPairsProcessing(object):
-    def __init__(self, max_vocab_size, min_count, window_size, dicts_folder, edges_folder, graph_folder, safe_files_number_per_processor):
+    def __init__(self, max_vocab_size, min_count, window_size, dicts_folder, edges_folder, graph_folder,
+                 safe_files_number_per_processor):
         self.max_vocab_size = max_vocab_size
         self.dicts_folder = dicts_folder
         self.min_count = min_count
@@ -17,7 +19,8 @@ class WordPairsProcessing(object):
 
     def write_valid_vocabulary(self):
         if (self.max_vocab_size == 'None') or (not self.max_vocab_size):
-            self.valid_vocabulary_path = self.dicts_folder + 'valid_vocabulary_min_count_' + self.min_count + '.txt'
+            self.valid_vocabulary_path = self.dicts_folder + 'valid_vocabulary_min_count_' + str(
+                self.min_count) + '.txt'
         else:
             self.valid_vocabulary_path = self.dicts_folder + 'valid_vocabulary_min_count_' + str(
                 self.min_count) + '_vocab_size_' + str(
@@ -159,7 +162,7 @@ class WordPairsProcessing(object):
 
     def apply(self, process_num):
         self.write_valid_vocabulary()
-        self.multiprocessing_merge_edges_count_of_a_specific_window_size(process_num=process_num)
+        return self.multiprocessing_merge_edges_count_of_a_specific_window_size(process_num=process_num)
 
     def __call__(self, process_num):
         self.apply(process_num)

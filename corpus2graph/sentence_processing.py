@@ -83,12 +83,13 @@ class SentenceProcessing(object):
                 return sum_counter(l[:mid]) + sum_counter(l[mid:])
 
         files = util.get_files_startswith(self.dicts_folder, "word_count_")
-        return dict(sum_counter(files))
+        result = dict(sum_counter(files))
+        util.write_dict_type_specified(self.dicts_folder + "word_count_all.txt", result, 'str')
+        return result
         # c = Counter()
         # for file in files:
         #     counter_temp = util.read_two_columns_file_to_build_dictionary_type_specified(file, int, int)
         #     c += counter_temp
-        # util.write_dict_type_specified(self.dicts_folder + "word_count_all.txt", dict(c), 'str')
         # return dict(c)
 
     def apply(self, data_folder, process_num):
@@ -97,7 +98,7 @@ class SentenceProcessing(object):
                                 file_extension=self.local_dict_extension,
                                 worker=self.fromfile,
                                 process_num=process_num)
-        self.merge_transferred_word_count()
+        return self.merge_transferred_word_count()
 
     def __call__(self, data_folder, process_num):
         self.apply(data_folder, process_num)

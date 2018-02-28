@@ -51,52 +51,7 @@ Remove rare tokens:
 #
 #
 
-# def filter_edges(min_count,
-#                  old_encoded_edges_count_path,
-#                  max_vocab_size=config['graph']['max_vocab_size'],
-#                  new_valid_vocabulary_folder=config['graph']['dicts_and_encoded_texts_folder'],
-#                  merged_word_count_path=config['graph']['dicts_and_encoded_texts_folder'] + 'word_count_all.txt',
-#                  output_folder=config['graph']['graph_folder']):
-#     """
-#     ATTENTION 1:
-#     This function should only be used when 'encoded_edges_count_window_size_n.txt' already exists (But when calculating
-#     this, 'max_vocab_size' has been set to 'None' in 'write_valid_vocabulary' function).
-#     If 'max_vocab_size' has already been well set, there's no need to use this function.
-#     Because 'encoded_edges_count_window_size_n.txt' has been generated with considering 'min_count' and 'max_vocab_size'
-#
-#     ATTENTION 2:
-#     'min_count' should be no bigger than the previous one.
-#     """
-#     new_valid_vocabulary_path = new_valid_vocabulary_folder + 'valid_vocabulary_min_count_' + str(
-#         min_count) + '_vocab_size_' + str(max_vocab_size) + '.txt'
-#     write_valid_vocabulary(
-#         merged_word_count_path=merged_word_count_path,
-#         output_path=new_valid_vocabulary_path,
-#         min_count=min_count,
-#         max_vocab_size=max_vocab_size)
-#
-#     valid_vocabulary = dict.fromkeys(read_valid_vocabulary(file_path=new_valid_vocabulary_path))
-#     filtered_edges = {}
-#     for line in util.read_file_line_yielder(old_encoded_edges_count_path):
-#         (source, target, weight) = line.split("\t")
-#         if (source in valid_vocabulary) and (target in valid_vocabulary):
-#             filtered_edges[(source, target)] = int(weight)
-#     util.write_dict_to_file(output_folder + "encoded_edges_count_filtered.txt", filtered_edges, 'tuple')
-#     return filtered_edges
-#
-#
-# def reciprocal_for_edges_weight(old_encoded_edges_count_path, output_folder=config['graph']['graph_folder']):
-#     reciprocal_weight_edges = {}
-#     for line in util.read_file_line_yielder(old_encoded_edges_count_path):
-#         (source, target, weight) = line.split("\t")
-#         # reciprocal_weight_edges[(source, target)] = 1./int(weight)
-#         reciprocal_weight_edges[(source, target)] = 1
-#     # output_name = multi_processing.get_file_name(old_encoded_edges_count_path).split('.txt')[0]+'_reciprocal.txt'
-#     output_name = multi_processing.get_file_name(old_encoded_edges_count_path).split('.txt')[0]+'_allONE.txt'
-#     util.write_dict_to_file(output_folder + output_name, reciprocal_weight_edges, 'tuple')
-#     return reciprocal_weight_edges
-#
-#
+
 # def merge_encoded_edges_count_for_undirected_graph(old_encoded_edges_count_path,
 #                                                    output_folder=config['graph']['graph_folder']):
 #     """e.g.
