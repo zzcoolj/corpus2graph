@@ -73,7 +73,7 @@ class SentenceProcessing(object):
         # Write edges files of different window size based on the transfered encoded text
         self.write_edges_of_different_window_size(transferred_encoded_text, file_name)
 
-    def merge_transferred_word_count(self):
+    def merge_transferred_word_count(self, process_num=1):
         # TODO NOW Zheng multiprocessing
         def sum_counter(l):
             if len(l) == 1:
