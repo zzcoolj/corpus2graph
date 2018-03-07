@@ -1,3 +1,6 @@
+__author__ = 'Ruiqing YIN'
+
+import unittest
 from corpus2graph.applications import wordpair_generator, graph_tool_wrapper
 from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
     SentenceProcessing, WordPairsProcessing

@@ -1,3 +1,5 @@
+__author__ = 'Ruiqing YIN'
+
 from graph_tool.all import *
 
 class GraphToolWrapper(object):
