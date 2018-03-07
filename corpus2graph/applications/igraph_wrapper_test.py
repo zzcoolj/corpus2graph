@@ -25,16 +25,13 @@ class TestIGraph(unittest.TestCase):
     def test_igraph_wrapper_wrapper(self):
         wg = wordpair_generator.WordsGenerator(window_size=3, file_parser=self.data_type,
                                                xml_node_path=None, word_tokenizer='WordPunct',
-                                               remove_numbers=True, remove_punctuations=True,
-                                               stem_word=True, lowercase=True)
+                                               remove_numbers=False, remove_punctuations=False,
+                                               stem_word=False, lowercase=False)
 
         igt = igraph_wrapper.IGraphWrapper('Test')
-        print('in2')
         for w1, w2 in wg(self.data_folder):
-            print(w1, w2)
             igt.addPairs(w1, w2)
 
         graph = igt.getGraph()
-        print(graph.vs["word"])
-        print(graph.es)
+        print(graph.vs["name"])
         print(graph.es["weight"])

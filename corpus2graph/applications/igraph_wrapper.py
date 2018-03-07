@@ -25,8 +25,7 @@ class IGraphWrapper(object):
         else:
             self.idx[w] = self.curr_id
             self.curr_id += 1
-            v = self.graph.add_vertices(1)
-            self.graph.vs["word"].append(w)
+            self.graph.add_vertex(w)
             return self.idx[w]
 
     def addPairs(self, w1, w2):
