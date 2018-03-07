@@ -1,10 +1,13 @@
 # from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
 #     SentenceProcessing, WordPairsProcessing, util
-from ..word_processor import FileParser, WordPreprocessor, Tokenizer
-from ..word_processing import WordProcessing
-from ..wordpair_processing import WordPairsProcessing
-from ..sentence_processing import SentenceProcessing
-from ..util import count_time
+from corpus2graph import word_processing
+from corpus2graph import util
+
+# from ..word_processor import FileParser, WordPreprocessor, Tokenizer
+# from ..word_processing import WordProcessing
+# from ..wordpair_processing import WordPairsProcessing
+# from ..sentence_processing import SentenceProcessing
+# from ..util import count_time
 import time
 import configparser
 
@@ -25,10 +28,10 @@ min_count = 5
 max_vocab_size = 3
 
 start_time = time.time()
-wp = WordProcessing(output_folder=dicts_folder, word_tokenizer='', wtokenizer=Tokenizer.mytok,
+wp = word_processing.WordProcessing(output_folder=dicts_folder, word_tokenizer='', wtokenizer=word_processing.Tokenizer.mytok,
                     remove_numbers=False, remove_punctuations=False, stem_word=False, lowercase=False)
 merged_dict = wp.apply(data_folder=data_folder, process_num=process_num)
-print('time in seconds:', count_time(start_time))
+print('time in seconds:', util.count_time(start_time))
 
 # start_time = time.time()
 # sp = SentenceProcessing(dicts_folder=dicts_folder, output_folder=edges_folder,
