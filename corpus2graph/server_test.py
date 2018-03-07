@@ -10,10 +10,10 @@ import time
 import configparser
 
 config = configparser.ConfigParser()
-config.read('../test/config.ini')
+config.read('test/config.ini')
 
-# data_folder = '/dev/shm/zzheng-tmp/prep_partial/'
-data_folder = '/Users/zzcoolj/Code/GoW/data/training data/Wikipedia-Dumps_en_20170420_prep/'
+data_folder = '/dev/shm/zzheng-tmp/prep_partial/'
+# data_folder = '/Users/zzcoolj/Code/GoW/data/training data/Wikipedia-Dumps_en_20170420_prep/'
 output_folder = '../../server_output/'
 # TODO create edges, dicts, graph folder based on output_folder, no need to define them below.
 dicts_folder = output_folder + 'dicts_and_encoded_texts/'
