@@ -12,9 +12,13 @@ import configparser
 config = configparser.ConfigParser()
 config.read('test/config.ini')
 
+"""run command below in Code/corpus2graph folder
+python -m corpus2graph.server_test.py
+"""
+
 data_folder = '/dev/shm/zzheng-tmp/prep_partial/'
 # data_folder = '/Users/zzcoolj/Code/GoW/data/training data/Wikipedia-Dumps_en_20170420_prep/'
-output_folder = '../../server_output/'
+output_folder = '../server_output/'
 # TODO create edges, dicts, graph folder based on output_folder, no need to define them below.
 dicts_folder = output_folder + 'dicts_and_encoded_texts/'
 edges_folder = output_folder + 'edges/'
