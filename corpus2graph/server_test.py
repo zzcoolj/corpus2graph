@@ -10,7 +10,7 @@ import time
 import configparser
 
 config = configparser.ConfigParser()
-config.read('test/config.ini')
+config.read('corpus2graph/test/config.ini')
 
 """run command below in Code/corpus2graph folder
 python -m corpus2graph.server_test.py
