@@ -2,17 +2,17 @@ __author__ = 'Ruiqing YIN'
 
 from igraph import *
 
+
 class IGraphWrapper(object):
-    def __init__(self,
-                 Name='Graph'):
+    def __init__(self, Name='Graph'):
         self.name = Name
-        self.idx ={}
+        self.idx = {}
         self.curr_id = 0
         self.graph = Graph()
         self.graph.vs["word"] = []  # vertice property: store the corresponding word
-        self.graph.es["weight"] = [] # edge weight property: store the cooccurrence
+        self.graph.es["weight"] = []  # edge weight property: store the cooccurrence
 
-    def getWordId(self,w):
+    def getWordId(self, w):
         '''
         :param w: string
         :return: int word id
@@ -41,10 +41,9 @@ class IGraphWrapper(object):
         id2 = self.getWordId(w2)
         e = self.graph.get_eid(id1, id2, error=False)
         if e == -1:
-            e = self.graph.add_edges((id1, id2))
-            self.graph.es["weight"].append[1]
+            self.graph.add_edge(id1, id2, weight=1)
         else:
-            self.graph.es["weight"][e] += 1
+            self.graph.es[e]["weight"] += 1
 
     def getGraph(self):
         return self.graph

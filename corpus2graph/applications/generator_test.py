@@ -25,14 +25,14 @@ class TestGenerator(unittest.TestCase):
 
     def test_word_pairs_generator(self):
         wg = wordpair_generator.WordsGenerator(window_size=3, file_parser='txt',
-                     xml_node_path=None, word_tokenizer='WordPunct',
-                     remove_numbers=True, remove_punctuations=True,
-                     stem_word=True, lowercase=True)
+                                               xml_node_path=None, word_tokenizer='WordPunct',
+                                               remove_numbers=True, remove_punctuations=True,
+                                               stem_word=True, lowercase=True)
         print('-----Test sentence based generator-----')
         for p in wg.fromsent([1, 2, 3]):
             print(p)
         print('-----Test file based generator-----')
-        for p in wg.fromfile(self.data_folder+'AA/wiki_03.txt'):
+        for p in wg.fromfile(self.data_folder + 'AA/wiki_03.txt'):
             print(p)
 
         print('-----Test folder based generator-----')
