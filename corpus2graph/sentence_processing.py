@@ -2,6 +2,7 @@ from collections import Counter
 from . import util
 from . import multi_processing
 from .sentence_processor import WordPairsExtractor
+from multiprocessing import Pool
 
 
 class SentenceProcessing(object):
@@ -73,24 +74,41 @@ class SentenceProcessing(object):
         # Write edges files of different window size based on the transfered encoded text
         self.write_edges_of_different_window_size(transferred_encoded_text, file_name)
 
+    def sum_counter(self, l):
+        if len(l) == 1:
+            return Counter(util.read_two_columns_file_to_build_dictionary_type_specified(l[0], int, int))
+        else:
+            mid = len(l) // 2
+            return self.sum_counter(l[:mid]) + self.sum_counter(l[mid:])
+
     def merge_transferred_word_count(self, process_num=1):
-        # TODO NOW Zheng multiprocessing
-        def sum_counter(l):
+        def sum_counter_sub_word_counts(l):
+            print(l)
             if len(l) == 1:
-                return Counter(util.read_two_columns_file_to_build_dictionary_type_specified(l[0], int, int))
+                return l[0]
             else:
                 mid = len(l) // 2
-                return sum_counter(l[:mid]) + sum_counter(l[mid:])
+                return sum_counter_sub_word_counts(l[:mid]) + sum_counter_sub_word_counts(l[mid:])
 
+        # get all transferred word count files (word_count_all already been excluded in get_files_startswith function)
         files = util.get_files_startswith(self.dicts_folder, "word_count_")
-        result = dict(sum_counter(files))
-        util.write_dict_type_specified(self.dicts_folder + "word_count_all.txt", result, 'str')
-        return result
-        # c = Counter()
-        # for file in files:
-        #     counter_temp = util.read_two_columns_file_to_build_dictionary_type_specified(file, int, int)
-        #     c += counter_temp
-        # return dict(c)
+        # Each thread processes several target edges files and save their counted_edges.
+        files_list = multi_processing.chunkify(lst=files, n=process_num)
+        p = Pool(process_num)
+        sub_word_counts = p.starmap(self.sum_counter, zip(files_list))
+        print(len((sub_word_counts)))
+        p.close()
+        p.join()
+        print('All sub-processes done.')
+
+        result = dict(sum_counter_sub_word_counts(sub_word_counts))
+
+        # result = Counter()
+        # for sub_word_count in sub_word_counts:
+        #     result += sub_word_count
+
+        util.write_dict_type_specified(self.dicts_folder + "word_count_all.txt", dict(result), 'str')
+        return dict(result)
 
     def apply(self, data_folder, process_num):
         multi_processing.master(files_getter=multi_processing.get_files_endswith,
@@ -98,7 +116,7 @@ class SentenceProcessing(object):
                                 file_extension=self.local_dict_extension,
                                 worker=self.fromfile,
                                 process_num=process_num)
-        return self.merge_transferred_word_count()
+        return self.merge_transferred_word_count(process_num=process_num)
 
     def __call__(self, data_folder, process_num):
         self.apply(data_folder, process_num)

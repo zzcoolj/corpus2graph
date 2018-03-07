@@ -1,5 +1,4 @@
 import unittest
-import warnings
 from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
     SentenceProcessing, WordPairsProcessing, util
 import configparser

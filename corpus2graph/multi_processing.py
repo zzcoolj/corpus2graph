@@ -50,6 +50,7 @@ def master(files_getter, data_folder, file_extension, worker, process_num=4):
         p.close()
         p.join()
         print('All sub-processes done.')
+        return results
 
 
 def get_files_endswith(data_folder, file_extension):
