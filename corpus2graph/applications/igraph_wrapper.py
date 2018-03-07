@@ -4,6 +4,10 @@ from igraph import *
 
 
 class IGraphWrapper(object):
+    """
+    graph.union does not handle edge attributes
+    """
+
     def __init__(self, Name='Graph'):
         self.name = Name
         self.idx = {}
@@ -12,7 +16,7 @@ class IGraphWrapper(object):
         self.graph.vs["word"] = []  # vertice property: store the corresponding word
         self.graph.es["weight"] = []  # edge weight property: store the cooccurrence
 
-    def getWordId(self, w):
+    def vertex_exist(self, w):
         '''
         :param w: string
         :return: int word id
@@ -21,14 +25,13 @@ class IGraphWrapper(object):
         then set its property to word) return the corresponding id
         '''
         if w in self.idx:
-            return self.idx[w]
+            return True
         else:
             self.idx[w] = self.curr_id
             self.curr_id += 1
-            self.graph.add_vertex(w)
-            return self.idx[w]
+            return False
 
-    def addPairs(self, w1, w2):
+    def addPair(self, w1, w2):
         '''
         :param w1: str
         :param w2: str
@@ -36,17 +39,20 @@ class IGraphWrapper(object):
         if edge(w1,w2) not in graph, add the edge and set its property weight to 1
         else update the weight by add 1
         '''
-        id1 = self.getWordId(w1)
-        id2 = self.getWordId(w2)
-        e = self.graph.get_eid(id1, id2, error=False)
-        if e == -1:
-            self.graph.add_edge(id1, id2, weight=1)
+        w1_exist = self.vertex_exist(w1)
+        w2_exist = self.vertex_exist(w2)
+        if w1_exist and w2_exist:
+            e = self.graph.get_eid(w1, w2, error=False)
+            if e != -1:
+                self.graph.es[e]["weight"] += 1
+            else:
+                self.graph.add_vertex(w1)
+                self.graph.add_vertex(w2)
+                self.graph.add_edge(w1, w2, weight=1)
         else:
-            self.graph.es[e]["weight"] += 1
+            self.graph.add_vertex(w1)
+            self.graph.add_vertex(w2)
+            self.graph.add_edge(w1, w2, weight=1)
 
     def getGraph(self):
         return self.graph
-
-
-
-
