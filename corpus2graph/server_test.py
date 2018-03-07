@@ -1,7 +1,5 @@
-# from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
-#     SentenceProcessing, WordPairsProcessing, util
-from corpus2graph import word_processing
-from corpus2graph import util
+from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
+    SentenceProcessing, WordPairsProcessing, util
 
 # from ..word_processor import FileParser, WordPreprocessor, Tokenizer
 # from ..word_processing import WordProcessing
@@ -14,8 +12,8 @@ import configparser
 config = configparser.ConfigParser()
 config.read('../test/config.ini')
 
-data_folder = '/dev/shm/zzheng-tmp/prep_partial/'
-# data_folder = '/Users/zzcoolj/Code/GoW/data/training data/Wikipedia-Dumps_en_20170420_prep/'
+# data_folder = '/dev/shm/zzheng-tmp/prep_partial/'
+data_folder = '/Users/zzcoolj/Code/GoW/data/training data/Wikipedia-Dumps_en_20170420_prep/'
 output_folder = '../../server_output/'
 # TODO create edges, dicts, graph folder based on output_folder, no need to define them below.
 dicts_folder = output_folder + 'dicts_and_encoded_texts/'
@@ -28,7 +26,7 @@ min_count = 5
 max_vocab_size = 3
 
 start_time = time.time()
-wp = word_processing.WordProcessing(output_folder=dicts_folder, word_tokenizer='', wtokenizer=word_processing.Tokenizer.mytok,
+wp = WordProcessing(output_folder=dicts_folder, word_tokenizer='', wtokenizer=Tokenizer.mytok,
                     remove_numbers=False, remove_punctuations=False, stem_word=False, lowercase=False)
 merged_dict = wp.apply(data_folder=data_folder, process_num=process_num)
 print('time in seconds:', util.count_time(start_time))
