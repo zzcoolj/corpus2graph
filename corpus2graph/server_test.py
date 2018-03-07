@@ -58,7 +58,6 @@ wg = wordpair_generator.WordsGenerator(window_size=max_window_size,
                                        stem_word=False, lowercase=False)
 igt = igraph_wrapper.IGraphWrapper('Test')
 for w1, w2 in wg(data_folder):
-    print(w1, w2)
     igt.addPair(w1, w2)
 graph = igt.getGraph()
 print('time in seconds:', util.count_time(start_time))
