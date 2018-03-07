@@ -18,10 +18,8 @@ class TestProcessings(unittest.TestCase):
     edges_folder = output_folder + 'edges/'
     graph_folder = output_folder + 'graph/'
 
-    file_extension = '.txt'
     max_window_size = 6
     process_num = 3
-    data_type = 'txt'
     min_count = 5
     max_vocab_size = 3
 

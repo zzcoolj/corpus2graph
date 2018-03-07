@@ -4,3 +4,4 @@ __pycache__/
 data/
 output/
 LICENSE.txt
+server_output/
