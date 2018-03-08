@@ -7,12 +7,8 @@ graph_builder is used by negative_samples_generator.py to get what is needed to 
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
-import configparser
 import corpus2graph.util as util
 import corpus2graph.multi_processing
-
-config = configparser.ConfigParser()
-config.read('../test/config.ini')
 
 
 class NoGraph:
@@ -103,7 +99,7 @@ class NXGraph:
         return cls(graph, name_prefix, nx.is_directed(graph))
 
     @classmethod
-    def from_encoded_edges_count_file(cls, path, directed=config.getboolean("graph", "directed")):
+    def from_encoded_edges_count_file(cls, path, directed):
         name_prefix = corpus2graph.multi_processing.get_file_name(path).split('.')[0]
         if directed:
             graph = nx.read_weighted_edgelist(path, create_using=nx.DiGraph(), nodetype=int)
