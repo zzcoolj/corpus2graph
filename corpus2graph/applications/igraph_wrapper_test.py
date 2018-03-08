@@ -23,7 +23,7 @@ class TestIGraph(unittest.TestCase):
     min_count = 5
     max_vocab_size = 3
 
-    def test_igraph_wrapper_wrapper(self):
+    def test_igraph_wrapper(self):
         wg = wordpair_generator.WordsGenerator(window_size=3, file_parser=self.data_type,
                                                xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
                                                remove_numbers=False, remove_punctuations=False,
