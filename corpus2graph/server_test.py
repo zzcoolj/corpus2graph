@@ -19,9 +19,9 @@ python -m corpus2graph.server_test.py
 
 # data_folder = '/Users/zzcoolj/Code/GoW/data/training data/Wikipedia-Dumps_en_20170420_prep/'
 
-# data_folder = '/dev/shm/zzheng-tmp/prep/'
+data_folder = '/dev/shm/zzheng-tmp/prep/'
 # data_folder = '/dev/shm/zzheng-tmp/prep_partial/'
-data_folder = '/dev/shm/zzheng-tmp/prep_3_files/'
+# data_folder = '/dev/shm/zzheng-tmp/prep_3_files/'
 
 output_folder = 'server_output/'
 # TODO create edges, dicts, graph folder based on output_folder, no need to define them below.
@@ -30,9 +30,11 @@ edges_folder = output_folder + 'edges/'
 graph_folder = output_folder + 'graph/'
 
 max_window_size = 5
-process_num = 1
-min_count = 0
-max_vocab_size = 'None'
+process_num = 30
+min_count = 5
+max_vocab_size = 10000
+# min_count = 0
+# max_vocab_size = 'None'
 
 start_time = time.time()
 wp = WordProcessing(output_folder=dicts_folder, word_tokenizer='', wtokenizer=Tokenizer.mytok,
