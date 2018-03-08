@@ -1,6 +1,7 @@
 from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
     SentenceProcessing, WordPairsProcessing, util
-from corpus2graph.applications import wordpair_generator, igraph_wrapper, graph_builder as gb
+# from corpus2graph.applications import wordpair_generator, igraph_wrapper, graph_builder as gb
+
 # from ..word_processor import FileParser, WordPreprocessor, Tokenizer
 # from ..word_processing import WordProcessing
 # from ..wordpair_processing import WordPairsProcessing
@@ -57,6 +58,7 @@ max_vocab_size = 10000
 # wpp.convert_encoded_edges_count_for_undirected_graph(
 #     old_encoded_edges_count_path=graph_folder + 'encoded_edges_count_window_size_5.txt')
 
+from corpus2graph.applications import graph_builder as gb
 
 # load into NoGraph and calculate stochastic matrix
 start_time = time.time()
