@@ -35,3 +35,7 @@ class TestGraphTool(unittest.TestCase):
             gtw.addPairs(w1, w2)
 
         graph = gtw.getGraph()
+        print('---- vertice ----')
+        print([gtw.vname[v] for v in graph.vertices()])
+        print('---- edge ----')
+        print([gtw.eweight[e] for e in graph.edges()])
