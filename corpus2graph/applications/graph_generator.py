@@ -36,6 +36,7 @@ class GraphGenerator(object):
     def fromfile(self, file_path):
         print('Processing file %s...' % (file_path))
         pairs = []
+        words = []
         for sent in self.file_parser(file_path):
             processed_sent = []
             for word in self.tokenizer.apply(sent):
@@ -43,9 +44,10 @@ class GraphGenerator(object):
                 if not word:
                     continue
                 processed_sent.append(word)
+            words.extend(processed_sent)
             pairs.extend(self.fromsent(processed_sent))
         d = collections.Counter(pairs)
-        return [(k.split()[0], k.split()[1], d[k]) for k in d]
+        return [(k.split()[0], k.split()[1], d[k]) for k in d], set(words)
 
     def apply(self, data_folder):
         files = multi_processing.get_files_endswith_in_all_subfolders(

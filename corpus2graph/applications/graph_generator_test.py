@@ -32,9 +32,11 @@ class TestGenerator(unittest.TestCase):
         print(gg.fromsent([1, 2, 3]))
 
         print('-----Test file based generator-----')
-        for p in gg.fromfile(self.data_folder + 'AA/wiki_03.txt'):
-            print(p)
+        p = gg.fromfile(self.data_folder + 'AA/wiki_03.txt')
+        print(p[0])
+        print(p[1])
 
         print('-----Test folder based generator-----')
         for p in gg(self.data_folder):
-            print(p)
+            print(p[0])
+            print(p[1])
