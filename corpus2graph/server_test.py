@@ -62,8 +62,8 @@ from corpus2graph.applications import graph_builder as gb
 
 # load into NoGraph and calculate stochastic matrix
 start_time = time.time()
-no_graph = gb.NoGraph(data_folder + 'encoded_edges_count_window_size_5_undirected.txt',
-                      valid_vocabulary_path=data_folder + 'valid_vocabulary_min_count_5_vocab_size_10000.txt')
+no_graph = gb.NoGraph(graph_folder + 'encoded_edges_count_window_size_5_undirected.txt',
+                      valid_vocabulary_path=dicts_folder + 'valid_vocabulary_min_count_5_vocab_size_10000.txt')
 print('[load into NoGraph] time in seconds:', util.count_time(start_time))
 start_time = time.time()
 matrix = no_graph.get_stochastic_matrix(remove_self_loops=False)
@@ -72,7 +72,7 @@ print('[calculate stochastic matrix] time in seconds:', util.count_time(start_ti
 
 # load into NetworkX and calculate stochastic matrix
 start_time = time.time()
-graph = gb.NXGraph.from_encoded_edges_count_file(path=data_folder + 'encoded_edges_count_window_size_5_undirected.txt',
+graph = gb.NXGraph.from_encoded_edges_count_file(path=graph_folder + 'encoded_edges_count_window_size_5_undirected.txt',
                                                  directed=False)
 print('[load into NXGraph] time in seconds:', util.count_time(start_time))
 start_time = time.time()
