@@ -127,28 +127,6 @@ class TestProcessings(unittest.TestCase):
         self.assertEqual(len(result), 5 + 2)  # 2 self loops
 
     def test_4_convert_encoded_edges_count_for_undirected_graph(self):
-        wpp = WordPairsProcessing(max_vocab_size=None, min_count=self.min_count,
-                                  dicts_folder=self.dicts_folder, window_size=self.max_window_size,
-                                  edges_folder=self.edges_folder, graph_folder=self.graph_folder,
-                                  safe_files_number_per_processor=config['graph']['safe_files_number_per_processor'])
-        directed = wpp.apply(process_num=self.process_num)
-
-        # TODO NOW
-        directed = gdp.multiprocessing_merge_edges_count_of_a_specific_window_size(window_size=50, process_num=5,
-                                                                                   min_count=self.min_count,
-                                                                                   dicts_folder=self.dicts_folder,
-                                                                                   edges_folder=self.edges_folder,
-                                                                                   output_folder=self.graph_folder,
-                                                                                   max_vocab_size=None)
-        word2id = gdp.read_two_columns_file_to_build_dictionary_type_specified(
-            file=self.dicts_folder + 'dict_merged.txt', key_type=str,
-            value_type=int)
-
-        undirected = gdp.merge_encoded_edges_count_for_undirected_graph(
-            old_encoded_edges_count_path=
-            self.graph_folder + "encoded_edges_count_window_size_" + str(self.max_window_size) + ".txt",
-            output_folder=self.graph_folder)
-
         def equal_test(word1, word2):
             if directed[(str(word2id[word1]), str(word2id[word2]))] \
                     and directed[(str(word2id[word2]), str(word2id[word1]))]:
@@ -168,6 +146,20 @@ class TestProcessings(unittest.TestCase):
             else:
                 print('No direct edge between ' + word1 + ' and ' + word2)
                 self.assertEqual(sum_count, 0)
+
+        wpp = WordPairsProcessing(max_vocab_size=None, min_count=self.min_count,
+                                  dicts_folder=self.dicts_folder, window_size=50,
+                                  edges_folder=self.edges_folder, graph_folder=self.graph_folder,
+                                  safe_files_number_per_processor=config['graph']['safe_files_number_per_processor'])
+        directed = wpp.apply(process_num=self.process_num)
+
+        word2id = util.read_two_columns_file_to_build_dictionary_type_specified(
+            file=self.dicts_folder + 'dict_merged.txt', key_type=str,
+            value_type=int)
+
+        undirected = wpp.convert_encoded_edges_count_for_undirected_graph(
+            old_encoded_edges_count_path=
+            self.graph_folder + "encoded_edges_count_window_size_" + str(self.max_window_size) + ".txt")
 
         equal_test('and', ',')
         equal_test('the', '.')
