@@ -91,18 +91,21 @@ class SentenceProcessing(object):
 
         # get all transferred word count files (word_count_all already been excluded in get_files_startswith function)
         files = util.get_files_startswith(self.dicts_folder, "word_count_")
-        if len(files)//2 < process_num:
-            process_num = len(files)//2
-            print('process_num set to', process_num, 'for word count merging')
-        # Each thread processes several target edges files and save their counted_edges.
-        files_list = multi_processing.chunkify(lst=files, n=process_num)
-        p = Pool(process_num)
-        sub_word_counts = p.starmap(self.sum_counter, zip(files_list))
-        p.close()
-        p.join()
-        print('All sub-processes done.')
+        if len(files) == 1:
+            result = util.read_two_columns_file_to_build_dictionary_type_specified(files[0], int, int)
+        else:
+            if len(files)//2 < process_num:
+                process_num = len(files)//2
+                print('process_num set to', process_num, 'for word count merging')
+            # Each thread processes several target edges files and save their counted_edges.
+            files_list = multi_processing.chunkify(lst=files, n=process_num)
+            p = Pool(process_num)
+            sub_word_counts = p.starmap(self.sum_counter, zip(files_list))
+            p.close()
+            p.join()
+            print('All sub-processes done.')
 
-        result = dict(sum_counter_sub_word_counts(sub_word_counts))
+            result = dict(sum_counter_sub_word_counts(sub_word_counts))
 
         # result = Counter()
         # for sub_word_count in sub_word_counts:

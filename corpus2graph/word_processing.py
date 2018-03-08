@@ -71,21 +71,24 @@ class WordProcessing(object):
         files = [os.path.join(self.output_folder, name) for name in os.listdir(self.output_folder)
                  if (os.path.isfile(os.path.join(self.output_folder, name))
                      and name.startswith("dict_") and (name != 'dict_merged.txt'))]
-        # Fix process_num
-        if len(files)//2 < process_num:
-            process_num = len(files)//2
-            print('process_num set to', process_num, 'for local dict merging')
-        # multiprocessing
-        files_list = multi_processing.chunkify(lst=files, n=process_num)
-        p = Pool(process_num)
-        sub_merged_dicts = p.starmap(self.local_dicts_merger_worker, zip(files_list))
-        p.close()
-        p.join()
-        print('All sub-processes done.')
+        if len(files) == 1:
+            all_keys = self.read_first_column_file_to_build_set(files[0])
+        else:
+            # Fix process_num
+            if len(files)//2 < process_num:
+                process_num = len(files)//2
+                print('process_num set to', process_num, 'for local dict merging')
+            # multiprocessing
+            files_list = multi_processing.chunkify(lst=files, n=process_num)
+            p = Pool(process_num)
+            sub_merged_dicts = p.starmap(self.local_dicts_merger_worker, zip(files_list))
+            p.close()
+            p.join()
+            print('All sub-processes done.')
 
-        all_keys = set()
-        for sub_merged_dict in sub_merged_dicts:
-            all_keys |= sub_merged_dict
+            all_keys = set()
+            for sub_merged_dict in sub_merged_dicts:
+                all_keys |= sub_merged_dict
 
         result = dict(zip(all_keys, range(len(all_keys))))
         util.write_dict(self.output_folder + 'dict_merged.txt', result)
