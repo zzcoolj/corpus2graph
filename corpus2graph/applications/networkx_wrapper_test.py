@@ -48,10 +48,6 @@ class TestNetworkX(unittest.TestCase):
 
     def test_our_method(self):
         igt = networkx_wrapper.IGraphWrapper('Test')
-        gg = graph_generator.GraphGenerator(window_size=3, file_parser=self.data_type,
-                                            xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
-                                            remove_numbers=False, remove_punctuations=False,
-                                            stem_word=False, lowercase=False)
         igt.add_edges_from_file(
             path='../test/output/keep/encoded_edges_count_window_size_6_vocab_size_none_undirected_for_unittest.txt')
         graph = igt.getGraph()
