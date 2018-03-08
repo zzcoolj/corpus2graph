@@ -41,31 +41,20 @@ max_vocab_size = 10000
 #                     remove_numbers=False, remove_punctuations=False, stem_word=False, lowercase=False)
 # merged_dict = wp.apply(data_folder=data_folder, process_num=process_num)
 # print('time in seconds:', util.count_time(start_time))
-#
+
 # start_time = time.time()
 # sp = SentenceProcessing(dicts_folder=dicts_folder, output_folder=edges_folder,
 #                         max_window_size=max_window_size, local_dict_extension=config['graph']['local_dict_extension'])
 # word_count_all = sp.apply(data_folder=dicts_folder, process_num=process_num)
 # print('time in seconds:', util.count_time(start_time))
 
-start_time = time.time()
+# start_time = time.time()
 wpp = WordPairsProcessing(max_vocab_size=max_vocab_size, min_count=min_count,
                           dicts_folder=dicts_folder, window_size=max_window_size,
                           edges_folder=edges_folder, graph_folder=graph_folder,
                           safe_files_number_per_processor=config['graph']['safe_files_number_per_processor'])
-result = wpp.apply(process_num=process_num)
-print('time in seconds:', util.count_time(start_time))
-
-
-# # igraph naive
-# start_time = time.time()
-# data_folder = '/dev/shm/zzheng-tmp/prep_3_files/'
-# wg = wordpair_generator.WordsGenerator(window_size=max_window_size,
-#                                        xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
-#                                        remove_numbers=False, remove_punctuations=False,
-#                                        stem_word=False, lowercase=False)
-# igt = igraph_wrapper.IGraphWrapper('Test')
-# for w1, w2 in wg(data_folder):
-#     igt.addPair(w1, w2)
-# graph = igt.getGraph()
+# result = wpp.apply(process_num=process_num)
 # print('time in seconds:', util.count_time(start_time))
+
+wpp.convert_encoded_edges_count_for_undirected_graph(
+    old_encoded_edges_count_path=graph_folder + 'encoded_edges_count_window_size_5.txt')
