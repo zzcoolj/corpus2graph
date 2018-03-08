@@ -29,4 +29,11 @@ class IGraphWrapper(object):
     def getGraph(self):
         return self.graph
 
-    # add_weighted_edges_from
+    def add_edges_from_file(self, path):
+        # used by our method
+        self.graph = nx.read_weighted_edgelist(path, create_using=nx.DiGraph(), nodetype=int)
+
+    def add_edges_from_list(self, edges):
+        # used by graph_generator.py
+        # edges: [(k.split()[0], k.split()[1], d[k]) for k in d]
+        self.graph.add_weighted_edges_from(edges)

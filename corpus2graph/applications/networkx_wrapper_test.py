@@ -1,5 +1,5 @@
 import unittest
-from corpus2graph.applications import wordpair_generator, networkx_wrapper
+from corpus2graph.applications import wordpair_generator, networkx_wrapper, graph_generator
 from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
     SentenceProcessing, WordPairsProcessing
 
@@ -22,17 +22,42 @@ class TestNetworkX(unittest.TestCase):
     min_count = 5
     max_vocab_size = 3
 
-    def test_networkx_wrapper(self):
+    def test_naive_wrapper(self):
+        igt = networkx_wrapper.IGraphWrapper('Test')
         wg = wordpair_generator.WordsGenerator(window_size=3, file_parser=self.data_type,
                                                xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
                                                remove_numbers=False, remove_punctuations=False,
                                                stem_word=False, lowercase=False)
-        igt = networkx_wrapper.IGraphWrapper('Test')
         for w1, w2 in wg(self.data_folder):
             igt.addPair(w1, w2)
         graph = igt.getGraph()
         print(graph.nodes)
         print(graph.edges)
+
+    def test_one_file_based_wrapper(self):
+        igt = networkx_wrapper.IGraphWrapper('Test')
+        gg = graph_generator.GraphGenerator(window_size=3, file_parser=self.data_type,
+                                            xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
+                                            remove_numbers=False, remove_punctuations=False,
+                                            stem_word=False, lowercase=False)
+        igt.add_edges_from_list(gg.fromfile(self.data_folder + 'AA/wiki_03.txt'))
+        graph = igt.getGraph()
+        print(graph.nodes)
+        print(graph.edges)
+
+    def test_our_method(self):
+        igt = networkx_wrapper.IGraphWrapper('Test')
+        gg = graph_generator.GraphGenerator(window_size=3, file_parser=self.data_type,
+                                            xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
+                                            remove_numbers=False, remove_punctuations=False,
+                                            stem_word=False, lowercase=False)
+        igt.add_edges_from_file(
+            path='../test/output/keep/encoded_edges_count_window_size_6_vocab_size_none_undirected_for_unittest.txt')
+        graph = igt.getGraph()
+        print(graph.nodes)
+        print(graph.edges)
+
+
 
     # def test_union_graphs(self):
     #     wg = wordpair_generator.WordsGenerator(window_size=3, file_parser=self.data_type,
