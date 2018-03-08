@@ -1,6 +1,6 @@
 from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
     SentenceProcessing, WordPairsProcessing, util
-from corpus2graph.applications import wordpair_generator, igraph_wrapper
+from corpus2graph.applications import wordpair_generator, igraph_wrapper, graph_builder as gb
 # from ..word_processor import FileParser, WordPreprocessor, Tokenizer
 # from ..word_processing import WordProcessing
 # from ..wordpair_processing import WordPairsProcessing
@@ -24,7 +24,6 @@ data_folder = '/dev/shm/zzheng-tmp/prep/'
 # data_folder = '/dev/shm/zzheng-tmp/prep_3_files/'
 
 output_folder = 'server_output/'
-# TODO create edges, dicts, graph folder based on output_folder, no need to define them below.
 dicts_folder = output_folder + 'dicts_and_encoded_texts/'
 edges_folder = output_folder + 'edges/'
 graph_folder = output_folder + 'graph/'
@@ -33,8 +32,6 @@ max_window_size = 5
 process_num = 30
 min_count = 5
 max_vocab_size = 10000
-# min_count = 0
-# max_vocab_size = 'None'
 
 # start_time = time.time()
 # wp = WordProcessing(output_folder=dicts_folder, word_tokenizer='', wtokenizer=Tokenizer.mytok,
@@ -49,12 +46,33 @@ max_vocab_size = 10000
 # print('time in seconds:', util.count_time(start_time))
 
 # start_time = time.time()
-wpp = WordPairsProcessing(max_vocab_size=max_vocab_size, min_count=min_count,
-                          dicts_folder=dicts_folder, window_size=max_window_size,
-                          edges_folder=edges_folder, graph_folder=graph_folder,
-                          safe_files_number_per_processor=config['graph']['safe_files_number_per_processor'])
+# wpp = WordPairsProcessing(max_vocab_size=max_vocab_size, min_count=min_count,
+#                           dicts_folder=dicts_folder, window_size=max_window_size,
+#                           edges_folder=edges_folder, graph_folder=graph_folder,
+#                           safe_files_number_per_processor=config['graph']['safe_files_number_per_processor'])
 # result = wpp.apply(process_num=process_num)
 # print('time in seconds:', util.count_time(start_time))
 
-wpp.convert_encoded_edges_count_for_undirected_graph(
-    old_encoded_edges_count_path=graph_folder + 'encoded_edges_count_window_size_5.txt')
+# # convert edges for undirected graph
+# wpp.convert_encoded_edges_count_for_undirected_graph(
+#     old_encoded_edges_count_path=graph_folder + 'encoded_edges_count_window_size_5.txt')
+
+
+# load into NoGraph and calculate stochastic matrix
+start_time = time.time()
+no_graph = gb.NoGraph(data_folder + 'encoded_edges_count_window_size_5_undirected.txt',
+                      valid_vocabulary_path=data_folder + 'valid_vocabulary_min_count_5_vocab_size_10000.txt')
+print('[load into NoGraph] time in seconds:', util.count_time(start_time))
+start_time = time.time()
+matrix = no_graph.get_stochastic_matrix(remove_self_loops=False)
+print('[calculate stochastic matrix] time in seconds:', util.count_time(start_time))
+
+
+# load into NetworkX and calculate stochastic matrix
+start_time = time.time()
+graph = gb.NXGraph.from_encoded_edges_count_file(path=data_folder + 'encoded_edges_count_window_size_5_undirected.txt',
+                                                 directed=False)
+print('[load into NXGraph] time in seconds:', util.count_time(start_time))
+start_time = time.time()
+matrix = graph.get_stochastic_matrix(remove_self_loops=False)
+print('[calculate stochastic matrix] time in seconds:', util.count_time(start_time))
