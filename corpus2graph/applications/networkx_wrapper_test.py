@@ -40,7 +40,8 @@ class TestNetworkX(unittest.TestCase):
                                             xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
                                             remove_numbers=False, remove_punctuations=False,
                                             stem_word=False, lowercase=False)
-        igt.add_edges_from_list(gg.fromfile(self.data_folder + 'AA/wiki_03.txt'))
+        edges, nodes = gg.fromfile(self.data_folder + 'AA/wiki_03.txt')
+        igt.add_edges_from_list(edges)
         graph = igt.getGraph()
         print(graph.nodes)
         print(graph.edges)
