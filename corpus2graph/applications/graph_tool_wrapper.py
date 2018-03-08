@@ -1,14 +1,14 @@
 __author__ = 'Ruiqing YIN'
 
 from graph_tool.all import *
-
+import numpy as np
 class GraphToolWrapper(object):
     def __init__(self,
                  Name='Graph'):
         self.name = Name
         self.idx ={}
         self.curr_id = 0
-        self.graph = Graph(directed=False)
+        self.graph = Graph(directed=True)
         self.vname = self.graph.new_vertex_property("string")  # vertice property: store the corresponding word
         self.eweight = self.graph.new_edge_property("int64_t") # edge weight property: store the cooccurrence
 
@@ -48,6 +48,21 @@ class GraphToolWrapper(object):
 
         else:
             self.eweight[e] += 1
+
+    def addEdgesFromFile(self, path):
+        # used by our method
+        file = open(path, 'r')
+        edges = [[triple.split()[0], triple.split()[1], triple.split()[2]] for triple in file]
+        self.vname = self.graph.add_edge_list(edges, hashed=True, string_vals=True, eprops=[self.eweight])
+
+    def addEdgesFromList(self, pl, wl):
+        #self.idx = { word: ind for ind, word in enumerate(wl)}
+        #edges = np.array([[self.idx[s],self.idx[t], w] for s,t,w in pl])
+        # self.graph.add_vertex(len(wl))
+        # self.graph.add_edge_list(edges, eprops=[self.eweight])
+        edges = [[s, t, w] for s, t, w in pl]
+        self.vname = self.graph.add_edge_list(edges, hashed=True, string_vals=True, eprops=[self.eweight])
+
 
     def getGraph(self):
         return self.graph

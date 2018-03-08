@@ -1,7 +1,7 @@
 __author__ = 'Ruiqing YIN'
 
 import unittest
-from corpus2graph.applications import wordpair_generator, graph_tool_wrapper
+from corpus2graph.applications import wordpair_generator, graph_tool_wrapper, graph_generator
 from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
     SentenceProcessing, WordPairsProcessing
 
@@ -33,6 +33,32 @@ class TestGraphTool(unittest.TestCase):
         gtw = graph_tool_wrapper.GraphToolWrapper('Test')
         for w1,w2 in wg(self.data_folder):
             gtw.addPairs(w1, w2)
+
+        graph = gtw.getGraph()
+        print('---- vertice ----')
+        print([gtw.vname[v] for v in graph.vertices()])
+        print('---- edge ----')
+        print([gtw.eweight[e] for e in graph.edges()])
+
+    def test_add_edges(self):
+        gg = graph_generator.GraphGenerator(window_size=3, file_parser='txt',
+                                            xml_node_path=None, word_tokenizer='WordPunct',
+                                            remove_numbers=True, remove_punctuations=True,
+                                            stem_word=True, lowercase=True)
+        pl, wl = gg.fromfile(self.data_folder + 'AA/wiki_03.txt')
+        gtw = graph_tool_wrapper.GraphToolWrapper('Test')
+        gtw.addEdgesFromList(pl,wl)
+
+        graph = gtw.getGraph()
+        print('---- vertice ----')
+        print([gtw.vname[v] for v in graph.vertices()])
+        print('---- edge ----')
+        print([gtw.eweight[e] for e in graph.edges()])
+
+    def test_our_method(self):
+        gtw = graph_tool_wrapper.GraphToolWrapper('Test')
+        gtw.addEdgesFromFile(
+            path='../test/output/keep/encoded_edges_count_window_size_6_vocab_size_none_undirected_for_unittest.txt')
 
         graph = gtw.getGraph()
         print('---- vertice ----')
