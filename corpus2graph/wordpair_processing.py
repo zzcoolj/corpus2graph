@@ -93,7 +93,8 @@ class WordPairsProcessing(object):
                 num_tasks = 1
                 process_num = 1
             files_list = multi_processing.chunkify(lst=files, n=num_tasks)
-            p = Pool(process_num)
+            # TODO test maxtasksperchild helps or not
+            p = Pool(process_num, maxtasksperchild=1)
 
             p.starmap(self.get_counted_edges_worker,
                       zip(files_list))
