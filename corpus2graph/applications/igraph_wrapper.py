@@ -46,12 +46,12 @@ class IGraphWrapper(object):
             if e != -1:
                 self.graph.es[e]["weight"] += 1
             else:
-                self.graph.add_vertex(w1)
-                self.graph.add_vertex(w2)
                 self.graph.add_edge(w1, w2, weight=1)
         else:
-            self.graph.add_vertex(w1)
-            self.graph.add_vertex(w2)
+            if not w1_exist:
+                self.graph.add_vertex(w1)
+            if not w2_exist:
+                self.graph.add_vertex(w2)
             self.graph.add_edge(w1, w2, weight=1)
 
     def getGraph(self):
