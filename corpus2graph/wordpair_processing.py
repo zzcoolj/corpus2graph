@@ -160,6 +160,36 @@ class WordPairsProcessing(object):
 
         return counted_edges_of_specific_window_size
 
+    def convert_encoded_edges_count_for_undirected_graph(self, old_encoded_edges_count_path):
+        """e.g.
+        In old encoded edges count file:
+            17  57  8
+            ...
+            57  17  2
+        return:
+            17  57  10 or 57   17  10 (only one of them will appear in the file.)
+
+
+        nltk.data.path = ['/vol/datailes/tools/nlp/nltk_data/2016']
+
+        # get undirected edges count for all file
+        for i in range(2, 11):
+            file_path = 'output/intermediate data/graph/encoded_edges_count_window_size_' + str(i) + '.txt'
+            graph_data_provider.merge_encoded_edges_count_for_undirected_graph(file_path)
+        """
+        merged_weight_edges = {}
+        for line in util.read_file_line_yielder(old_encoded_edges_count_path):
+            (source, target, weight) = line.split("\t")
+            if (target, source) in merged_weight_edges:
+                # edge[source][target] inverse edge edge[target][source] already put into the merged_weight_edges
+                merged_weight_edges[(target, source)] += int(weight)
+            else:
+                # The first time merged_weight_edges meets edge[source][target] or its inverse edge edge[target][source]
+                merged_weight_edges[(source, target)] = int(weight)
+        output_name = multi_processing.get_file_name(old_encoded_edges_count_path).split('.txt')[0] + '_undirected.txt'
+        util.write_dict_type_specified(self.graph_folder + output_name, merged_weight_edges, 'tuple')
+        return merged_weight_edges
+
     def apply(self, process_num):
         self.write_valid_vocabulary()
         return self.multiprocessing_merge_edges_count_of_a_specific_window_size(process_num=process_num)
