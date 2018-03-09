@@ -12,7 +12,7 @@ class IGraphWrapper(object):
         self.name = Name
         self.idx = {}
         self.curr_id = 0
-        self.graph = Graph()
+        self.graph = Graph(directed=True)
         self.graph.vs["word"] = []  # vertice property: store the corresponding word
         self.graph.es["weight"] = []  # edge weight property: store the cooccurrence
 
@@ -53,6 +53,22 @@ class IGraphWrapper(object):
             if not w2_exist:
                 self.graph.add_vertex(w2)
             self.graph.add_edge(w1, w2, weight=1)
+
+    def add_edges_from_file(self, path):
+        # used by our method
+        edges = []
+        weights = []
+        nodes = set()
+        with open(path) as f:
+            for line in f:
+                n1, n2, w = line.rstrip('\n').split()
+                nodes.add(n1)
+                nodes.add(n2)
+                edges.append((n1, n2))
+                weights.extend(w)
+        self.graph.add_vertices(list(nodes))
+        self.graph.add_edges(edges)
+        self.graph.es["weight"] = weights
 
     def getGraph(self):
         return self.graph

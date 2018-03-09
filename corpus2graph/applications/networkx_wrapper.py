@@ -11,7 +11,7 @@ class IGraphWrapper(object):
         self.name = Name
         self.idx = {}
         self.curr_id = 0
-        self.graph = nx.Graph()
+        self.graph = nx.DiGraph()
 
     def addPair(self, w1, w2):
         """
