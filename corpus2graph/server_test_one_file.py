@@ -90,14 +90,14 @@ igt = igraph_wrapper.IGraphWrapper('Test')
 igt.add_edges_from_file(path=graph_folder+'encoded_edges_count_window_size_5.txt')
 print('[corpus2graph] time in seconds:', util.count_time(start_time))
 
-# igraph: naive
-start_time = time.time()
-wg = wordpair_generator.WordsGenerator(window_size=max_window_size,
-                                       xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
-                                       remove_numbers=False, remove_punctuations=False,
-                                       stem_word=False, lowercase=False)
-igt = igraph_wrapper.IGraphWrapper('Test')
-for w1, w2 in wg(data_folder):
-    igt.addPair(w1, w2)
-graph = igt.getGraph()
-print('[naive] time in seconds:', util.count_time(start_time))
+# # igraph: naive
+# start_time = time.time()
+# wg = wordpair_generator.WordsGenerator(window_size=max_window_size,
+#                                        xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
+#                                        remove_numbers=False, remove_punctuations=False,
+#                                        stem_word=False, lowercase=False)
+# igt = igraph_wrapper.IGraphWrapper('Test')
+# for w1, w2 in wg(data_folder):
+#     igt.addPair(w1, w2)
+# graph = igt.getGraph()
+# print('[naive] time in seconds:', util.count_time(start_time))

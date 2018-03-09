@@ -19,8 +19,6 @@ class TestNetworkX(unittest.TestCase):
     max_window_size = 6
     process_num = 3
     data_type = 'txt'
-    min_count = 5
-    max_vocab_size = 3
 
     def test_naive_wrapper(self):
         igt = networkx_wrapper.IGraphWrapper('Test')

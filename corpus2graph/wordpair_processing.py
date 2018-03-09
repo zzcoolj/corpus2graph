@@ -30,19 +30,23 @@ class WordPairsProcessing(object):
             file=self.dicts_folder + 'word_count_all.txt',
             key_type=str, value_type=int)
 
-        valid_word_count = {}
-        for word_id, count in merged_word_count.items():
-            if count >= self.min_count:
-                valid_word_count[word_id] = count
-        if self.max_vocab_size and (self.max_vocab_size != 'None'):
-            if int(self.max_vocab_size) < len(valid_word_count):
-                # TODO Zheng sort by value and then by key: change valid_word_count to tuple
-                valid_vocabulary = list(sorted(valid_word_count, key=valid_word_count.get, reverse=True))[
-                                   :int(self.max_vocab_size)]
+        if ((self.max_vocab_size == 'None') or (not self.max_vocab_size)) and (self.min_count == 0):
+            print('in in in')
+            valid_vocabulary = list(merged_word_count.keys())
+        else:
+            valid_word_count = {}
+            for word_id, count in merged_word_count.items():
+                if count >= self.min_count:
+                    valid_word_count[word_id] = count
+            if self.max_vocab_size and (self.max_vocab_size != 'None'):
+                if int(self.max_vocab_size) < len(valid_word_count):
+                    # TODO Zheng sort by value and then by key: change valid_word_count to tuple
+                    valid_vocabulary = list(sorted(valid_word_count, key=valid_word_count.get, reverse=True))[
+                                       :int(self.max_vocab_size)]
+                else:
+                    valid_vocabulary = list(valid_word_count.keys())
             else:
                 valid_vocabulary = list(valid_word_count.keys())
-        else:
-            valid_vocabulary = list(valid_word_count.keys())
 
         util.write_simple_list(self.valid_vocabulary_path, valid_vocabulary)
         return valid_vocabulary
