@@ -25,7 +25,7 @@ edges_folder = output_folder + 'edges/'
 graph_folder = output_folder + 'graph/'
 
 max_window_size = 5
-process_num = 30
+process_num = 50
 min_count = 5
 max_vocab_size = 10000
 
@@ -49,9 +49,9 @@ wpp = WordPairsProcessing(max_vocab_size=max_vocab_size, min_count=min_count,
 result = wpp.apply(process_num=process_num)
 print('time in seconds:', util.count_time(start_time))
 
-# convert edges for undirected graph
-wpp.convert_encoded_edges_count_for_undirected_graph(
-    old_encoded_edges_count_path=graph_folder + 'encoded_edges_count_window_size_5.txt')
+# # convert edges for undirected graph
+# wpp.convert_encoded_edges_count_for_undirected_graph(
+#     old_encoded_edges_count_path=graph_folder + 'encoded_edges_count_window_size_5.txt')
 
 
 # from corpus2graph.applications import graph_builder as gb
