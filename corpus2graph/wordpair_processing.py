@@ -31,7 +31,6 @@ class WordPairsProcessing(object):
             key_type=str, value_type=int)
 
         if ((self.max_vocab_size == 'None') or (not self.max_vocab_size)) and (self.min_count == 0):
-            print('in in in')
             valid_vocabulary = list(merged_word_count.keys())
         else:
             valid_word_count = {}
@@ -110,7 +109,6 @@ class WordPairsProcessing(object):
             counted_edges_paths = multi_processing.get_files_endswith(data_folder=self.edges_folder,
                                                                       file_extension='.pickle')
             if len(counted_edges_paths) == 1:
-                print('in,in')
                 counted_edges = Counter(util.read_pickle(counted_edges_paths[0]))
             else:
                 count = 1
