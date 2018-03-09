@@ -20,7 +20,7 @@ edges_folder = output_folder + 'edges/'
 graph_folder = output_folder + 'graph/'
 
 data_type = 'txt'
-max_window_size = 2
+max_window_size = 5
 process_num = 1
 min_count = 0
 max_vocab_size = 'None'
