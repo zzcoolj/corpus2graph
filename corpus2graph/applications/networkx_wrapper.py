@@ -26,9 +26,6 @@ class IGraphWrapper(object):
         else:
             self.graph.add_edge(w1, w2, weight=1)
 
-    def getGraph(self):
-        return self.graph
-
     def add_edges_from_file(self, path):
         # used by our method
         self.graph = nx.read_weighted_edgelist(path, create_using=nx.DiGraph(), nodetype=int)
@@ -37,3 +34,6 @@ class IGraphWrapper(object):
         # used by graph_generator.py
         # edges: [(k.split()[0], k.split()[1], d[k]) for k in d]
         self.graph.add_weighted_edges_from(edges)
+
+    def getGraph(self):
+        return self.graph
