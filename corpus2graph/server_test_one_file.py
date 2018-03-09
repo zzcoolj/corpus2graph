@@ -41,32 +41,32 @@ wpp = WordPairsProcessing(max_vocab_size=max_vocab_size, min_count=min_count,
                           edges_folder=edges_folder, graph_folder=graph_folder,
                           safe_files_number_per_processor=config['graph']['safe_files_number_per_processor'])
 result = wpp.apply(process_num=process_num)
-
-igt = networkx_wrapper.IGraphWrapper('Test')
-igt.add_edges_from_file(path=graph_folder+'encoded_edges_count_window_size_5.txt')
 print('[corpus2graph] time in seconds:', util.count_time(start_time))
-
-# NetworkX: naive
-start_time = time.time()
-igt = networkx_wrapper.IGraphWrapper('Test')
-wg = wordpair_generator.WordsGenerator(window_size=max_window_size, file_parser=data_type,
-                                       xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
-                                       remove_numbers=False, remove_punctuations=False,
-                                       stem_word=False, lowercase=False)
-for w1, w2 in wg(data_folder):
-    igt.addPair(w1, w2)
-print('[naive] time in seconds:', util.count_time(start_time))
-
-# NetworkX: advanced naive
-start_time = time.time()
-igt = networkx_wrapper.IGraphWrapper('Test')
-gg = graph_generator.GraphGenerator(window_size=max_window_size, file_parser=data_type,
-                                    xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
-                                    remove_numbers=False, remove_punctuations=False,
-                                    stem_word=False, lowercase=False)
-edges, nodes = gg.fromfile(data_folder + 'AA/wiki_00.txt')
-igt.add_edges_from_list(edges)
-print('[advanced naive] time in seconds:', util.count_time(start_time))
+# igt = networkx_wrapper.IGraphWrapper('Test')
+# igt.add_edges_from_file(path=graph_folder+'encoded_edges_count_window_size_5.txt')
+# print('[corpus2graph] time in seconds:', util.count_time(start_time))
+#
+# # NetworkX: naive
+# start_time = time.time()
+# igt = networkx_wrapper.IGraphWrapper('Test')
+# wg = wordpair_generator.WordsGenerator(window_size=max_window_size, file_parser=data_type,
+#                                        xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
+#                                        remove_numbers=False, remove_punctuations=False,
+#                                        stem_word=False, lowercase=False)
+# for w1, w2 in wg(data_folder):
+#     igt.addPair(w1, w2)
+# print('[naive] time in seconds:', util.count_time(start_time))
+#
+# # NetworkX: advanced naive
+# start_time = time.time()
+# igt = networkx_wrapper.IGraphWrapper('Test')
+# gg = graph_generator.GraphGenerator(window_size=max_window_size, file_parser=data_type,
+#                                     xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
+#                                     remove_numbers=False, remove_punctuations=False,
+#                                     stem_word=False, lowercase=False)
+# edges, nodes = gg.fromfile(data_folder + 'AA/wiki_00.txt')
+# igt.add_edges_from_list(edges)
+# print('[advanced naive] time in seconds:', util.count_time(start_time))
 
 
 # from corpus2graph.applications import igraph_wrapper
