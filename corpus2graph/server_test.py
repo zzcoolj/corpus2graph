@@ -29,17 +29,17 @@ process_num = 50
 min_count = 5
 max_vocab_size = 10000
 
-start_time = time.time()
-wp = WordProcessing(output_folder=dicts_folder, word_tokenizer='', wtokenizer=Tokenizer.mytok,
-                    remove_numbers=False, remove_punctuations=False, stem_word=False, lowercase=False)
-merged_dict = wp.apply(data_folder=data_folder, process_num=process_num)
-print('time in seconds:', util.count_time(start_time))
-
-start_time = time.time()
-sp = SentenceProcessing(dicts_folder=dicts_folder, output_folder=edges_folder,
-                        max_window_size=max_window_size, local_dict_extension=config['graph']['local_dict_extension'])
-word_count_all = sp.apply(data_folder=dicts_folder, process_num=process_num)
-print('time in seconds:', util.count_time(start_time))
+# start_time = time.time()
+# wp = WordProcessing(output_folder=dicts_folder, word_tokenizer='', wtokenizer=Tokenizer.mytok,
+#                     remove_numbers=False, remove_punctuations=False, stem_word=False, lowercase=False)
+# merged_dict = wp.apply(data_folder=data_folder, process_num=process_num)
+# print('time in seconds:', util.count_time(start_time))
+#
+# start_time = time.time()
+# sp = SentenceProcessing(dicts_folder=dicts_folder, output_folder=edges_folder,
+#                         max_window_size=max_window_size, local_dict_extension=config['graph']['local_dict_extension'])
+# word_count_all = sp.apply(data_folder=dicts_folder, process_num=process_num)
+# print('time in seconds:', util.count_time(start_time))
 
 start_time = time.time()
 wpp = WordPairsProcessing(max_vocab_size=max_vocab_size, min_count=min_count,
