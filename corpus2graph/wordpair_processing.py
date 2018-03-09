@@ -109,12 +109,16 @@ class WordPairsProcessing(object):
             # Merge all counted_edges from workers and get the final result.
             counted_edges_paths = multi_processing.get_files_endswith(data_folder=self.edges_folder,
                                                                       file_extension='.pickle')
-            count = 1
-            counted_edges = Counter(dict())
-            for c in counted_edges_from_worker_yielder(paths=counted_edges_paths):
-                counted_edges += c
-                print('%i/%i files processed.' % (count, len(files_list)), end='\r', flush=True)
-                count += 1
+            if len(counted_edges_paths) == 1:
+                print('in,in')
+                counted_edges = Counter(util.read_pickle(counted_edges_paths[0]))
+            else:
+                count = 1
+                counted_edges = Counter(dict())
+                for c in counted_edges_from_worker_yielder(paths=counted_edges_paths):
+                    counted_edges += c
+                    print('%i/%i files processed.' % (count, len(files_list)), end='\r', flush=True)
+                    count += 1
 
             # Remove all counted_edges from workers.
             for file_path in counted_edges_paths:
