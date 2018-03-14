@@ -125,46 +125,46 @@ class WordPairsProcessing(object):
 
             return counted_edges
 
-        # Get all target edges files' paths to be merged and counted.
-        files = {}
-        for i in range(2, self.window_size + 1):
-            files_of_specific_distance = multi_processing.get_files_endswith(self.edges_folder,
-                                                                             "_encoded_edges_distance_{0}.txt".format(
-                                                                                 i))
+        # No encoded edges count already existed, calculate them from distance 2 to distance size.
+        counted_edges_of_specific_window_size = None
+        start_distance = 2
+
+        # Generate counted edges of different window sizes in a stepwise way.
+        if already_existed_window_size:
+            if already_existed_window_size < self.window_size:
+                already_existed_counted_edges_path = self.graph_folder + "encoded_edges_count_window_size_" \
+                                                     + str(already_existed_window_size) + ".txt"
+                d = {}
+                with open(already_existed_counted_edges_path) as f:
+                    for line in f:
+                        (first, second, count) = line.rstrip('\n').split("\t")
+                        d[(first, second)] = int(count)
+                counted_edges_of_specific_window_size = Counter(d)
+                start_distance = already_existed_window_size + 1
+            else:
+                print('[ERROR] already_existed_window_size is equal or larger than window_size: no edges information.')
+                exit()
+
+        for i in range(start_distance, self.window_size + 1):
+            files_of_specific_distance = multi_processing.get_files_endswith(
+                self.edges_folder, "_encoded_edges_distance_{0}.txt".format(i))
             if not files_of_specific_distance:
-                print('No encoded edges file of window size ' + str(self.window_size) + '. Reset window size to ' + str(
+                print('No encoded edges file of window size ' + str(
+                    self.window_size) + '. Reset window size to ' + str(
                     i - 1) + '.')
                 self.window_size = i - 1
                 break
             else:
-                files[i] = files_of_specific_distance
-
-        # Generate counted edges of different window sizes in a stepwise way.
-        if not already_existed_window_size:
-            # No encoded edges count already existed, calculate them from distance 2 to distance size.
-            counted_edges_of_specific_window_size = None
-            start_distance = 2
-        else:
-            already_existed_counted_edges_path = self.graph_folder + "encoded_edges_count_window_size_" \
-                                                 + str(already_existed_window_size) + ".txt"
-            d = {}
-            with open(already_existed_counted_edges_path) as f:
-                for line in f:
-                    (first, second, count) = line.rstrip('\n').split("\t")
-                    d[(first, second)] = int(count)
-            counted_edges_of_specific_window_size = Counter(d)
-            start_distance = already_existed_window_size + 1
-        for i in range(start_distance, self.window_size + 1):
-            counted_edges_of_distance_i = get_counted_edges(files[i])
-            if i == 2:
-                # counted edges of window size 2 = counted edges of distance 2
-                counted_edges_of_specific_window_size = counted_edges_of_distance_i
-            else:
-                # counted edges of window size n (n>=3) = counted edges of window size n-1 + counted edges of distance n
-                counted_edges_of_specific_window_size += counted_edges_of_distance_i
-            util.write_dict_type_specified(self.graph_folder + "encoded_edges_count_window_size_" + str(i) + ".txt",
-                                           counted_edges_of_specific_window_size, 'tuple')
-
+                counted_edges_of_distance_i = get_counted_edges(files_of_specific_distance)
+                if i == 2:
+                    # counted edges of window size 2 = counted edges of distance 2
+                    counted_edges_of_specific_window_size = counted_edges_of_distance_i
+                else:
+                    # counted edges of window size n (n>=3) = counted edges of window size n-1
+                    #                                           + counted edges of distance n
+                    counted_edges_of_specific_window_size += counted_edges_of_distance_i
+                util.write_dict_type_specified(self.graph_folder + "encoded_edges_count_window_size_" + str(i) + ".txt",
+                                               counted_edges_of_specific_window_size, 'tuple')
         return counted_edges_of_specific_window_size
 
     def convert_encoded_edges_count_for_undirected_graph(self, old_encoded_edges_count_path):
