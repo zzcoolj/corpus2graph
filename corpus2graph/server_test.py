@@ -46,7 +46,8 @@ wpp = WordPairsProcessing(max_vocab_size=max_vocab_size, min_count=min_count,
                           dicts_folder=dicts_folder, window_size=max_window_size,
                           edges_folder=edges_folder, graph_folder=graph_folder,
                           safe_files_number_per_processor=config['graph']['safe_files_number_per_processor'])
-result = wpp.apply(process_num=process_num)
+# result = wpp.apply(process_num=process_num)
+wpp.multiprocessing_merge_edges_count_of_a_specific_window_size(process_num=process_num, already_existed_window_size=4)
 print('time in seconds:', util.count_time(start_time))
 
 # # convert edges for undirected graph
