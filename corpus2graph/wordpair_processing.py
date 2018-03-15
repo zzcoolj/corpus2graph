@@ -54,6 +54,7 @@ class WordPairsProcessing(object):
         def counters_yielder():
             def read_edges_file_with_respect_to_valid_vocabulary(file_path, valid_vocabulary_dict):
                 d = []
+                print(file_path)
                 with open(file_path) as f:
                     for line in f:
                         (first, second) = line.rstrip('\n').split("\t")
@@ -99,6 +100,7 @@ class WordPairsProcessing(object):
             # TODO test maxtasksperchild helps or not
             p = Pool(process_num, maxtasksperchild=1)
 
+            print(len(files_list))
             p.starmap(self.get_counted_edges_worker,
                       zip(files_list))
             p.close()
@@ -129,21 +131,21 @@ class WordPairsProcessing(object):
         counted_edges_of_specific_window_size = None
         start_distance = 2
 
-        # Generate counted edges of different window sizes in a stepwise way.
-        if already_existed_window_size:
-            if already_existed_window_size < self.window_size:
-                already_existed_counted_edges_path = self.graph_folder + "encoded_edges_count_window_size_" \
-                                                     + str(already_existed_window_size) + ".txt"
-                d = {}
-                with open(already_existed_counted_edges_path) as f:
-                    for line in f:
-                        (first, second, count) = line.rstrip('\n').split("\t")
-                        d[(first, second)] = int(count)
-                counted_edges_of_specific_window_size = Counter(d)
-                start_distance = already_existed_window_size + 1
-            else:
-                print('[ERROR] already_existed_window_size is equal or larger than window_size: no edges information.')
-                exit()
+        # # Generate counted edges of different window sizes in a stepwise way.
+        # if already_existed_window_size:
+        #     if already_existed_window_size < self.window_size:
+        #         already_existed_counted_edges_path = self.graph_folder + "encoded_edges_count_window_size_" \
+        #                                              + str(already_existed_window_size) + ".txt"
+        #         d = {}
+        #         with open(already_existed_counted_edges_path) as f:
+        #             for line in f:
+        #                 (first, second, count) = line.rstrip('\n').split("\t")
+        #                 d[(first, second)] = int(count)
+        #         counted_edges_of_specific_window_size = Counter(d)
+        #         start_distance = already_existed_window_size + 1
+        #     else:
+        #         print('[ERROR] already_existed_window_size is equal or larger than window_size: no edges information.')
+        #         exit()
 
         for i in range(start_distance, self.window_size + 1):
             files_of_specific_distance = multi_processing.get_files_endswith(
