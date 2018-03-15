@@ -140,7 +140,6 @@ class WordPairsProcessing(object):
                         (first, second, count) = line.rstrip('\n').split("\t")
                         d[(first, second)] = int(count)
                 counted_edges_of_specific_window_size = Counter(d)
-                print(counted_edges_of_specific_window_size)
                 start_distance = already_existed_window_size + 1
             else:
                 print('[ERROR] already_existed_window_size is equal or larger than window_size: no edges information.')
