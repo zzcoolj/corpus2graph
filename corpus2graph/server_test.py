@@ -25,7 +25,7 @@ edges_folder = output_folder + 'edges/'
 graph_folder = output_folder + 'graph/'
 
 max_window_size = 5
-process_num = 50
+process_num = 30
 min_count = 5
 max_vocab_size = 10000
 
