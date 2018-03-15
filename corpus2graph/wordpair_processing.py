@@ -14,22 +14,18 @@ class WordPairsProcessing(object):
         self.window_size = window_size
         self.edges_folder = edges_folder
         self.graph_folder = graph_folder
-        self.valid_vocabulary_path = None
         self.safe_files_number_per_processor = safe_files_number_per_processor
+        # initialize self.valid_vocabulary_path
+        if (max_vocab_size == 'None') or (not max_vocab_size):
+            self.valid_vocabulary_path = dicts_folder + 'valid_vocabulary_min_count_' + str(min_count) + '.txt'
+        else:
+            self.valid_vocabulary_path = dicts_folder + 'valid_vocabulary_min_count_' + str(min_count) + '_vocab_size_'\
+                                         + str(max_vocab_size) + '.txt'
 
     def write_valid_vocabulary(self):
-        if (self.max_vocab_size == 'None') or (not self.max_vocab_size):
-            self.valid_vocabulary_path = self.dicts_folder + 'valid_vocabulary_min_count_' + str(
-                self.min_count) + '.txt'
-        else:
-            self.valid_vocabulary_path = self.dicts_folder + 'valid_vocabulary_min_count_' + str(
-                self.min_count) + '_vocab_size_' + str(
-                self.max_vocab_size) + '.txt'
-
         merged_word_count = util.read_two_columns_file_to_build_dictionary_type_specified(
             file=self.dicts_folder + 'word_count_all.txt',
             key_type=str, value_type=int)
-
         if ((self.max_vocab_size == 'None') or (not self.max_vocab_size)) and (self.min_count == 0):
             valid_vocabulary = list(merged_word_count.keys())
         else:
@@ -54,7 +50,6 @@ class WordPairsProcessing(object):
         def counters_yielder():
             def read_edges_file_with_respect_to_valid_vocabulary(file_path, valid_vocabulary_dict):
                 d = []
-                print(file_path)
                 with open(file_path) as f:
                     for line in f:
                         (first, second) = line.rstrip('\n').split("\t")
@@ -100,7 +95,6 @@ class WordPairsProcessing(object):
             # TODO test maxtasksperchild helps or not
             p = Pool(process_num, maxtasksperchild=1)
 
-            print(len(files_list))
             p.starmap(self.get_counted_edges_worker,
                       zip(files_list))
             p.close()
@@ -131,21 +125,21 @@ class WordPairsProcessing(object):
         counted_edges_of_specific_window_size = None
         start_distance = 2
 
-        # # Generate counted edges of different window sizes in a stepwise way.
-        # if already_existed_window_size:
-        #     if already_existed_window_size < self.window_size:
-        #         already_existed_counted_edges_path = self.graph_folder + "encoded_edges_count_window_size_" \
-        #                                              + str(already_existed_window_size) + ".txt"
-        #         d = {}
-        #         with open(already_existed_counted_edges_path) as f:
-        #             for line in f:
-        #                 (first, second, count) = line.rstrip('\n').split("\t")
-        #                 d[(first, second)] = int(count)
-        #         counted_edges_of_specific_window_size = Counter(d)
-        #         start_distance = already_existed_window_size + 1
-        #     else:
-        #         print('[ERROR] already_existed_window_size is equal or larger than window_size: no edges information.')
-        #         exit()
+        # Generate counted edges of different window sizes in a stepwise way.
+        if already_existed_window_size:
+            if already_existed_window_size < self.window_size:
+                already_existed_counted_edges_path = self.graph_folder + "encoded_edges_count_window_size_" \
+                                                     + str(already_existed_window_size) + ".txt"
+                d = {}
+                with open(already_existed_counted_edges_path) as f:
+                    for line in f:
+                        (first, second, count) = line.rstrip('\n').split("\t")
+                        d[(first, second)] = int(count)
+                counted_edges_of_specific_window_size = Counter(d)
+                start_distance = already_existed_window_size + 1
+            else:
+                print('[ERROR] already_existed_window_size is equal or larger than window_size: no edges information.')
+                exit()
 
         for i in range(start_distance, self.window_size + 1):
             files_of_specific_distance = multi_processing.get_files_endswith(
