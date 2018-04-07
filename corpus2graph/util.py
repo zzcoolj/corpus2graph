@@ -2,6 +2,7 @@ __author__ = 'Zheng ZHANG'
 
 import nltk.data
 import os
+import errno
 # TODO Does it still work after comment this? If not, add this in config.ini
 # nltk.data.path.append("/Users/zzcoolj/Code/NLTK/nltk_data")
 
@@ -132,3 +133,23 @@ def get_files_startswith(data_folder, starting):
                  and name.startswith(starting)
                  and (name != 'word_count_all.txt'))]
     return files
+
+def mkdir_p(path):
+    """Create directory and all its parents if they do not exist
+    This is the equivalent of Unix 'mkdir -p path'
+    Parameter
+    ---------
+    path : str
+        Path to new directory.
+    Reference
+    ---------
+    http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python
+    """
+
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise exc
