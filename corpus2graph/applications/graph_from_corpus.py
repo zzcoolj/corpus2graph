@@ -51,10 +51,10 @@ def main():
     arguments = docopt(__doc__, version='1.O.O')
 
     data_folder = arguments['<data_dir>']
-    if not data_folder.endwith('/'):
+    if not data_folder.endswith('/'):
         data_folder += '/'
     output_folder = arguments['<output_dir>']
-    if not output_folder.endwith('/'):
+    if not output_folder.endswith('/'):
         output_folder += '/'
     dicts_folder = output_folder + 'dicts_and_encoded_texts/'
     edges_folder = output_folder + 'edges/'
