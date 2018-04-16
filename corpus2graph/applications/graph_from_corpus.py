@@ -47,11 +47,15 @@ from corpus2graph import Tokenizer, WordProcessing, SentenceProcessing, WordPair
 from docopt import docopt
 import time
 
-if __name__ == "__main__":
+def main():
     arguments = docopt(__doc__, version='1.O.O')
 
     data_folder = arguments['<data_dir>']
+    if not data_folder.endswith('/'):
+        data_folder += '/'
     output_folder = arguments['<output_dir>']
+    if not output_folder.endswith('/'):
+        output_folder += '/'
     dicts_folder = output_folder + 'dicts_and_encoded_texts/'
     edges_folder = output_folder + 'edges/'
     graph_folder = output_folder + 'graph/'

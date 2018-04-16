@@ -5,3 +5,4 @@ data/
 output/
 LICENSE.txt
 server_output/
+corpus2graph.egg-info/
