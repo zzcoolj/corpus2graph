@@ -5,11 +5,13 @@ Installation
 $ conda create --name corpus2graph python=3.6 anaconda
 $ source activate corpus2graph
 $ git clone https://github.com/zzcoolj/corpus2graph.git
+$ cd corpus2graph
+$ pip install -e .
 ```
 
 Usage:
 ```bash
-$ python -m corpus2graph.applications.graph_from_corpus -h
+$ graph_from_corpus -h
 Usage:
     graph_from_corpus all [--max_window_size=<max_window_size> --process_num=<process_num> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
     graph_from_corpus wordprocessing [--max_window_size=<max_window_size> --process_num=<process_num> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
