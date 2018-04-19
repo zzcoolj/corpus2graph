@@ -23,7 +23,7 @@ If you use this tool, please cite the following paper:
 
 
 
-##Usage:
+## Usage:
 ```bash
 $ graph_from_corpus -h
 Usage:
