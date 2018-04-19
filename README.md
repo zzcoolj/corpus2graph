@@ -1,6 +1,6 @@
 # corpus2graph
 
-Installation
+## Installation
 ```bash
 $ conda create --name corpus2graph python=3.6 anaconda
 $ source activate corpus2graph
@@ -8,8 +8,22 @@ $ git clone https://github.com/zzcoolj/corpus2graph.git
 $ cd corpus2graph
 $ pip install -e .
 ```
+## Citation
+If you use this tool, please cite the following paper:
+```bash
+@inproceedings{Zheng2018Eff,
+  Author = {Zheng Zhang and Ruiqing Yin and Pierre Zweigenbaum},
+  Title = {{Efficient Generation and Processing of Word Co-occurrence Networks Using corpus2graph}},
+  Booktitle = {{TextGraphs workshop in NAACL 2018, 16th Annual Conference of the North American Chapter of the Association for Computational Linguistics}},
+  Year = {2018},
+  Month = {June},
+  Url = {https://github.com/zzcoolj/corpus2graph}
+}
+```
 
-Usage:
+
+
+##Usage:
 ```bash
 $ graph_from_corpus -h
 Usage:
