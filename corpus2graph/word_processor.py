@@ -1,5 +1,6 @@
 import string
 import warnings
+import re
 from . import util
 
 
@@ -41,18 +42,23 @@ class FileParser(object):
 
 class WordPreprocessor(object):
     # default: config file.
-    def __init__(self, remove_numbers=True, remove_punctuations=True,
-                 stem_word=True, lowercase=True, wpreprocessor=None):
+    def __init__(self, remove_numbers, replace_digits_to_zeros, remove_punctuations,
+                 stem_word, lowercase, wpreprocessor):
         self.remove_numbers = remove_numbers
+        self.replace_digits_to_zeros = replace_digits_to_zeros
         self.remove_punctuations = remove_punctuations
         self.stem_word = stem_word
         self.lowercase = lowercase
         self.wpreprocessor = wpreprocessor
-        self.puncs = set(string.punctuation)
+        punctuations = set(string.punctuation)
+        punctuations.update({'“', '”', '—'})
+        self.puncs = punctuations
 
     def apply(self, word):
         if self.remove_numbers and word.isnumeric():
             return ''
+        if self.replace_digits_to_zeros:
+            word = re.sub('\d', '0', word)
         # Remove punctuations
         # if all(j.isdigit() or j in puncs for j in word):
         if self.remove_punctuations:
@@ -81,8 +87,15 @@ class WordPreprocessor(object):
 
 
 class Tokenizer(object):
+    @staticmethod
     def mytok(s):
-        return s.split()
+        """
+        An example of user customized tokenizer.
+        :return: list of tokens
+        """
+        import spacy
+        tk = spacy.load('en_core_web_sm')
+        return [token.text for token in tk(str.strip(s))]
 
     def __init__(self, word_tokenizer='Treebank', wtokenizer=None):
         if word_tokenizer not in ['Treebank', 'PunktWord', 'WordPunct', '']:

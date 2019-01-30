@@ -8,14 +8,14 @@ from .word_processor import FileParser, WordPreprocessor, Tokenizer
 class WordProcessing(object):
     def __init__(self, output_folder, file_parser='txt', fparser=None,
                  xml_node_path=None, word_tokenizer='WordPunct', wtokenizer=None,
-                 remove_numbers=True, remove_punctuations=True,
+                 remove_numbers=True, remove_punctuations=True, replace_digits_to_zeros=True,
                  stem_word=True, lowercase=True, wpreprocessor=None):
         self.output_folder = output_folder
-        # TODO create relevant folder inside output_folder
         self.file_parser = FileParser(file_parser=file_parser, xml_node_path=xml_node_path, fparser=fparser)
         # TODO NOW Ruiqing user defined file_parser yield type check
         self.file_extension = file_parser
         self.word_preprocessor = WordPreprocessor(remove_numbers=remove_numbers,
+                                                  replace_digits_to_zeros=replace_digits_to_zeros,
                                                   remove_punctuations=remove_punctuations,
                                                   stem_word=stem_word, lowercase=lowercase,
                                                   wpreprocessor=wpreprocessor)
