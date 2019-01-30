@@ -8,20 +8,6 @@ $ git clone https://github.com/zzcoolj/corpus2graph.git
 $ cd corpus2graph
 $ pip install -e .
 ```
-## Citation
-If you use this tool, please cite the following paper:
-```bash
-@inproceedings{Zheng2018Eff,
-  Author = {Zheng Zhang and Ruiqing Yin and Pierre Zweigenbaum},
-  Title = {{Efficient Generation and Processing of Word Co-occurrence Networks Using corpus2graph}},
-  Booktitle = {{TextGraphs workshop in NAACL 2018, 16th Annual Conference of the North American Chapter of the Association for Computational Linguistics}},
-  Year = {2018},
-  Month = {June},
-  Url = {https://github.com/zzcoolj/corpus2graph}
-}
-```
-
-
 
 ## Usage:
 ```bash
@@ -66,4 +52,24 @@ Output directory:
         Todo
 "wordpairsprocessing" mode:
         Todo
+```
+
+## Frequently asked questions
+* I got ```[ERROR] No valid files in the data folder.``` and how to solve it?
+    * Please put all of your text files in subfolders of ```<data-dir>```, not in ```<data-dir>```.
+    * Please make sure that your text files extensions are the same and are among ```txt```, ```xml``` and ```defined```.
+    The file parser ```fparser``` must be defined in ```word_processor.py``` if the file extension is ```defined```.
+
+
+## Citation
+If you use this tool, please cite the following paper:
+```bash
+@inproceedings{Zheng2018Eff,
+  Author = {Zheng Zhang and Ruiqing Yin and Pierre Zweigenbaum},
+  Title = {{Efficient Generation and Processing of Word Co-occurrence Networks Using corpus2graph}},
+  Booktitle = {{TextGraphs workshop in NAACL 2018, 16th Annual Conference of the North American Chapter of the Association for Computational Linguistics}},
+  Year = {2018},
+  Month = {June},
+  Url = {https://github.com/zzcoolj/corpus2graph}
+}
 ```
