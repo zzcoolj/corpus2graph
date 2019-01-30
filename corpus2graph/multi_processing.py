@@ -100,9 +100,6 @@ def get_file_folder(path):
 def worker_test(file):
     print('Processing file %s (%s)...' % (file, os.getpid()))
 
-# TESTS
-# master("/Users/zzcoolj/Code/bucc2017/zh-en", ".en", worker_test)
-# print(get_file_name("/Users/zzcoolj/Code/GoW/data/xin_eng/xin_eng_200410.xml"))
 
 def chunkify(lst, n):
     """
