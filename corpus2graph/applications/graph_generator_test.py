@@ -25,9 +25,9 @@ class TestGenerator(unittest.TestCase):
 
     def test_graph_generator(self):
         gg = graph_generator.GraphGenerator(window_size=3, file_parser='txt',
-                                               xml_node_path=None, word_tokenizer='WordPunct',
-                                               remove_numbers=True, remove_punctuations=True,
-                                               stem_word=True, lowercase=True)
+                                            xml_node_path=None, word_tokenizer='WordPunct',
+                                            remove_numbers=True, remove_punctuations=True,
+                                            stem_word=True, lowercase=True)
         print('-----Test sentence based generator-----')
         print(gg.fromsent([1, 2, 3]))
 

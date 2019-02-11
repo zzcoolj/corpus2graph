@@ -32,7 +32,6 @@ class GraphGenerator(object):
                           for end_index in range(1 + start_index, max_range)])
         return pairs
 
-
     def fromfile(self, file_path):
         print('Processing file %s...' % (file_path))
         pairs = []
