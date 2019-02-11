@@ -10,7 +10,8 @@ $ pip install -e .
 ```
 
 ## Corpus requirements
-* All text files should be in subfolders of ```<data-dir>``` (DO NOT put them directly in ```<data-dir>```);
+* All text files should be in subfolders of ```<data-dir>``` (DO NOT put them directly in ```<data-dir>```); 
+If there is only one text file, this tool will automatically provide you an option to split the file into several smaller files to benefit from multi-processing.
 * If you use the default parser ```txt_parser```, please make sure that your text files meet the "one sentence per line" requirement. 
 
 ## Usage:
