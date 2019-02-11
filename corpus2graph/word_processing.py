@@ -22,6 +22,9 @@ class WordProcessing(object):
         self.tokenizer = Tokenizer(word_tokenizer=word_tokenizer, wtokenizer=wtokenizer)
 
     def fromfile(self, file_path):
+        """
+        master sends jobs to processors, each processor takes one file at one time and execute this function.
+        """
         print('Processing file %s (%s)...' % (file_path, multi_processing.get_pid()))
 
         word2id = dict()  # key: word <-> value: index
@@ -95,6 +98,49 @@ class WordProcessing(object):
         return result
 
     def apply(self, data_folder, process_num):
+        # Handle the single training file case.
+        target_file = multi_processing.get_files_endswith_in_all_subfolders(data_folder=data_folder,
+                                                                            file_extension=self.file_extension)
+        if len(target_file) == 1:
+            print("Single text file founded! Do you want to split it into several smaller text files? y/n\n"
+                  "('y' is recommended for the large text file to benefit from multi-processing.)")
+            yes = {'yes', 'y', 'ye'}
+            no = {'no', 'n'}
+
+            while True:
+                choice = input().lower()
+                if choice in yes:
+                    # Splitting single large text file into smaller ones
+                    lines_per_file = 10000  # TODO determine a reasonable number
+                    if data_folder.endswith('/'):
+                        new_folder = data_folder[:-1] + '_small_files/'
+                    else:
+                        new_folder = data_folder + '_small_files/'
+                    if not os.path.exists(new_folder):
+                        os.makedirs(new_folder + 'one/')
+                    else:
+                        print('[ERROR] ' + new_folder + ' already exists.')
+                        exit()
+                    smallfile = None
+                    with open(target_file[0]) as bigfile:
+                        for lineno, line in enumerate(bigfile):
+                            if lineno % lines_per_file == 0:
+                                if smallfile:
+                                    smallfile.close()
+                                small_filename = 'small_file_{}.txt'.format(lineno + lines_per_file)
+                                smallfile = open(new_folder + 'one/' + small_filename, "w")
+                            smallfile.write(line)
+                        if smallfile:
+                            smallfile.close()
+                    print(new_folder +
+                          ' has been created with small split files. Please rerun this program with new <data_dir>.')
+                    exit()
+                elif choice in no:
+                    print("Continue running program with single text file. Only one processor is used.")
+                    break
+                else:
+                    print("Please respond with 'y'/'yes' or 'n'/'no'")
+
         multi_processing.master(files_getter=multi_processing.get_files_endswith_in_all_subfolders,
                                 data_folder=data_folder,
                                 file_extension=self.file_extension,
