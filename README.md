@@ -9,6 +9,10 @@ $ cd corpus2graph
 $ pip install -e .
 ```
 
+## Corpus requirements
+* All text files should be in subfolders of ```<data-dir>``` (DO NOT put them directly in ```<data-dir>```);
+* If you use the default parser ```txt_parser```, please make sure that your text files meet the "one sentence per line" requirement. 
+
 ## Usage:
 ```bash
 $ graph_from_corpus -h
@@ -56,7 +60,7 @@ Output directory:
 
 ## Frequently asked questions
 * I got ```[ERROR] No valid files in the data folder.``` and how to solve it?
-    * Please put all of your text files in subfolders of ```<data-dir>```, not in ```<data-dir>```.
+    * Please put all of your text files in subfolders of ```<data-dir>```, not directly in ```<data-dir>```.
     * Please make sure that your text files extensions are the same and are among ```txt```, ```xml``` and ```defined```.
     The file parser ```fparser``` must be defined in ```word_processor.py``` if the file extension is ```defined```.
 
