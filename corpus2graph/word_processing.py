@@ -122,7 +122,7 @@ class WordProcessing(object):
                         print('[ERROR] ' + new_folder + ' already exists.')
                         exit()
                     smallfile = None
-                    with open(target_file[0]) as bigfile:
+                    with open(target_file[0], encoding='utf-8') as bigfile:
                         for lineno, line in enumerate(bigfile):
                             if lineno % lines_per_file == 0:
                                 if smallfile:
