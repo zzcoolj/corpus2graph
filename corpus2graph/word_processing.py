@@ -128,7 +128,7 @@ class WordProcessing(object):
                                 if smallfile:
                                     smallfile.close()
                                 small_filename = 'small_file_{}.txt'.format(lineno + lines_per_file)
-                                smallfile = open(new_folder + 'one/' + small_filename, "w")
+                                smallfile = open(new_folder + 'one/' + small_filename, "w", encoding='utf-8')
                             smallfile.write(line)
                         if smallfile:
                             smallfile.close()
