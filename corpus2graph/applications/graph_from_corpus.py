@@ -76,7 +76,7 @@ def main():
         start_time = time.time()
         wp = WordProcessing(output_folder=dicts_folder, word_tokenizer='', wtokenizer=Tokenizer.mytok,
                             remove_numbers=True, replace_digits_to_zeros=True,
-                            remove_punctuations=True, stem_word=False, lowercase=True)
+                            remove_punctuations=False, stem_word=False, lowercase=True)
         merged_dict = wp.apply(data_folder=data_folder, process_num=process_num)
         sp = SentenceProcessing(dicts_folder=dicts_folder, output_folder=edges_folder,
                                 max_window_size=max_window_size, local_dict_extension='.dicloc')
@@ -93,7 +93,7 @@ def main():
         start_time = time.time()
         wp = WordProcessing(output_folder=dicts_folder, word_tokenizer='', wtokenizer=Tokenizer.mytok,
                             remove_numbers=True, replace_digits_to_zeros=True,
-                            remove_punctuations=True, stem_word=False, lowercase=True)
+                            remove_punctuations=False, stem_word=False, lowercase=True)
         merged_dict = wp.apply(data_folder=data_folder, process_num=process_num)
         print('time for word processing in seconds:', util.count_time(start_time))
 
