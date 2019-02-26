@@ -94,7 +94,8 @@ class Tokenizer(object):
         :return: list of tokens
         """
         import spacy
-        tk = spacy.load('en_core_web_sm')
+        # tk = spacy.load('en_core_web_sm')
+        tk = spacy.load('fr')
         return [token.text for token in tk(str.strip(s))]
 
     def __init__(self, word_tokenizer='Treebank', wtokenizer=None):
