@@ -134,6 +134,7 @@ def get_files_startswith(data_folder, starting):
                  and (name != 'word_count_all.txt'))]
     return files
 
+
 def mkdir_p(path):
     """Create directory and all its parents if they do not exist
     This is the equivalent of Unix 'mkdir -p path'
