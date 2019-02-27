@@ -21,7 +21,7 @@ class TestNetworkX(unittest.TestCase):
     data_type = 'txt'
 
     def test_naive_wrapper(self):
-        igt = networkx_wrapper.IGraphWrapper('Test')
+        igt = networkx_wrapper.NetworkXWrapper('Test')
         wg = wordpair_generator.WordsGenerator(window_size=3, file_parser=self.data_type,
                                                xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
                                                remove_numbers=False, remove_punctuations=False,
@@ -33,7 +33,7 @@ class TestNetworkX(unittest.TestCase):
         print(graph.edges)
 
     def test_one_file_based_wrapper(self):
-        igt = networkx_wrapper.IGraphWrapper('Test')
+        igt = networkx_wrapper.NetworkXWrapper('Test')
         gg = graph_generator.GraphGenerator(window_size=3, file_parser=self.data_type,
                                             xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
                                             remove_numbers=False, remove_punctuations=False,
@@ -45,7 +45,7 @@ class TestNetworkX(unittest.TestCase):
         print(graph.edges)
 
     def test_our_method(self):
-        igt = networkx_wrapper.IGraphWrapper('Test')
+        igt = networkx_wrapper.NetworkXWrapper('Test')
         igt.add_edges_from_file(
             path='../test/output/keep/encoded_edges_count_window_size_6_vocab_size_none_undirected_for_unittest.txt')
         graph = igt.getGraph()

@@ -69,6 +69,7 @@ For instance, is there any difference between the data folder which has only one
 (under the condition that these 100 files are identical)?
     * No, there's no difference. 
     This tool will generate a list of all valid text files before multiprocessing. 
+* The final result should be used for generating directed graph or undirected graph? 
 
 
 ## Citation

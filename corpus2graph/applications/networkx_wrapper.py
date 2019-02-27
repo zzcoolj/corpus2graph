@@ -3,7 +3,7 @@ __author__ = 'Zheng ZHANG'
 import networkx as nx
 
 
-class IGraphWrapper(object):
+class NetworkXWrapper(object):
     """
     graph.union does not handle edge attributes
     """
@@ -28,7 +28,7 @@ class IGraphWrapper(object):
             self.graph.add_edge(w1, w2, weight=1)
 
     def add_edges_from_file(self, path):
-        # used by our method
+        # used by our method (corpus2graph)
         self.graph = nx.read_weighted_edgelist(path, create_using=nx.DiGraph(), nodetype=int)
 
     def add_edges_from_list(self, edges):
