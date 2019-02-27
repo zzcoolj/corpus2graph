@@ -106,12 +106,11 @@ class WordProcessing(object):
                   "('y' is recommended for the large text file to benefit from multi-processing.)")
             yes = {'yes', 'y', 'ye'}
             no = {'no', 'n'}
-
             while True:
                 choice = input().lower()
                 if choice in yes:
                     # Splitting single large text file into smaller ones
-                    lines_per_file = 1000  # TODO determine a reasonable number
+                    lines_per_file = 200  # TODO determine a reasonable number
                     if data_folder.endswith('/'):
                         new_folder = data_folder[:-1] + '_small_files/'
                     else:
@@ -141,6 +140,7 @@ class WordProcessing(object):
                 else:
                     print("Please respond with 'y'/'yes' or 'n'/'no'")
 
+        # Now, multi-process all text files
         multi_processing.master(files_getter=multi_processing.get_files_endswith_in_all_subfolders,
                                 data_folder=data_folder,
                                 file_extension=self.file_extension,
