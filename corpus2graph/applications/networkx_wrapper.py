@@ -2,6 +2,7 @@ __author__ = 'Zheng ZHANG'
 
 import networkx as nx
 
+
 class IGraphWrapper(object):
     """
     graph.union does not handle edge attributes
@@ -9,11 +10,11 @@ class IGraphWrapper(object):
 
     def __init__(self, Name='Graph'):
         self.name = Name
-        self.idx = {}
-        self.curr_id = 0
         self.graph = nx.DiGraph()
 
     def addPair(self, w1, w2):
+        # used by wordpair_generator.py
+        # Naive way of generating word co-occurrence network, DO NOT USE IT!
         """
         :param w1: str
         :param w2: str
@@ -32,6 +33,7 @@ class IGraphWrapper(object):
 
     def add_edges_from_list(self, edges):
         # used by graph_generator.py
+        # A little bit better naive way of generating word co-occurrence network, DO NOT USE IT!
         # edges: [(k.split()[0], k.split()[1], d[k]) for k in d]
         self.graph.add_weighted_edges_from(edges)
 

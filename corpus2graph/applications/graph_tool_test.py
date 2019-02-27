@@ -2,9 +2,9 @@ __author__ = 'Ruiqing YIN'
 
 import unittest
 import time
-from corpus2graph.applications import wordpair_generator, graph_tool_wrapper, graph_generator
-from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
-    SentenceProcessing, WordPairsProcessing, util
+from corpus2graph.applications import graph_tool_wrapper
+from corpus2graph.applications.naive_methods import wordpair_generator
+from corpus2graph import Tokenizer, util
 
 import configparser
 config = configparser.ConfigParser()
@@ -28,9 +28,9 @@ class TestGraphTool(unittest.TestCase):
     def test_graph_tool_wrapper(self):
         start_time = time.time()
         wg = wordpair_generator.WordsGenerator(window_size=self.max_window_size, file_parser='txt',
-                     xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
-                     remove_numbers=False, remove_punctuations=False,
-                     stem_word=False, lowercase=False)
+                                               xml_node_path=None, word_tokenizer='', wtokenizer=Tokenizer.mytok,
+                                               remove_numbers=False, remove_punctuations=False,
+                                               stem_word=False, lowercase=False)
 
         gtw = graph_tool_wrapper.GraphToolWrapper('Test')
         for w1,w2 in wg(self.data_folder+'/tmp_dir/'):

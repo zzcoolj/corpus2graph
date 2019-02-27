@@ -1,12 +1,11 @@
-__author__ = 'Ruiqing YIN'
-
 import os
-from .. import util
-from .. import multi_processing
-from ..word_processor import FileParser, WordPreprocessor, Tokenizer
+import collections
+from corpus2graph import util
+from corpus2graph import multi_processing
+from corpus2graph.word_processor import FileParser, WordPreprocessor, Tokenizer
 
 
-class WordsGenerator(object):
+class GraphGenerator(object):
     def __init__(self, window_size, file_parser='txt', fparser=None,
                  xml_node_path=None, word_tokenizer='WordPunct',  wtokenizer=None,
                  remove_numbers=True, remove_punctuations=True,
@@ -23,17 +22,20 @@ class WordsGenerator(object):
 
     def fromsent(self, sent):
         sentence_len = len(sent)
+        pairs = []
         for start_index in range(sentence_len - 1):
             if start_index + self.window_size < sentence_len:
                 max_range = self.window_size + start_index
             else:
                 max_range = sentence_len
-            for end_index in range(1 + start_index, max_range):
-                yield sent[start_index], sent[end_index]
+            pairs.extend([str(sent[start_index])+' '+str(sent[end_index])
+                          for end_index in range(1 + start_index, max_range)])
+        return pairs
 
     def fromfile(self, file_path):
         print('Processing file %s...' % (file_path))
-
+        pairs = []
+        words = []
         for sent in self.file_parser(file_path):
             processed_sent = []
             for word in self.tokenizer.apply(sent):
@@ -41,17 +43,18 @@ class WordsGenerator(object):
                 if not word:
                     continue
                 processed_sent.append(word)
-            for pair in self.fromsent(processed_sent):
-                yield pair
+            words.extend(processed_sent)
+            pairs.extend(self.fromsent(processed_sent))
+        d = collections.Counter(pairs)
+        return [(k.split()[0], k.split()[1], d[k]) for k in d], set(words)
 
     def apply(self, data_folder):
         files = multi_processing.get_files_endswith_in_all_subfolders(
                                 data_folder=data_folder,
                                 file_extension=self.file_extension)
         for f in files:
-            for pair in self.fromfile(f):
-                yield pair
+            yield self.fromfile(f)
 
     def __call__(self, data_folder):
-        for pair in self.apply(data_folder):
-            yield pair
+        for l in self.apply(data_folder):
+            yield l

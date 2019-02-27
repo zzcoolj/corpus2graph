@@ -1,6 +1,6 @@
 import time
-from corpus2graph.applications import wordpair_generator, graph_tool_wrapper, graph_generator
-from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
+from corpus2graph.applications import graph_tool_wrapper
+from corpus2graph import Tokenizer, WordProcessing, \
     SentenceProcessing, WordPairsProcessing, util
 
 import configparser

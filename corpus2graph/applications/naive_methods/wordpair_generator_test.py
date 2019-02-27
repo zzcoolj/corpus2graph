@@ -1,8 +1,5 @@
 import unittest
-import warnings
-from corpus2graph.applications import wordpair_generator
-from corpus2graph import FileParser, WordPreprocessor, Tokenizer, WordProcessing, \
-    SentenceProcessing, WordPairsProcessing
+from corpus2graph.applications.naive_methods import wordpair_generator
 
 import configparser
 config = configparser.ConfigParser()
