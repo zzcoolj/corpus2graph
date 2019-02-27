@@ -64,6 +64,11 @@ Output directory:
     * Please put all of your text files in subfolders of ```<data-dir>```, not directly in ```<data-dir>```.
     * Please make sure that your text files extensions are the same and are among ```txt```, ```xml``` and ```defined```.
     The file parser ```fparser``` must be defined in ```word_processor.py``` if the file extension is ```defined```.
+* Will the organization (structure) of files in data folder influence the processing speed? 
+For instance, is there any difference between the data folder which has only one sub-folder with 100 files inside and the data folder which contains ten sub-folders with 10 files in each
+(under the condition that these 100 files are identical)?
+    * No, there's no difference. 
+    This tool will generate a list of all valid text files before multiprocessing. 
 
 
 ## Citation
