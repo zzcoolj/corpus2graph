@@ -13,7 +13,6 @@ class TestProcessings(unittest.TestCase):
     """
     data_folder = 'unittest_data/'
     output_folder = 'output/'
-    # TODO create edges, dicts, graph folder based on output_folder, no need to define them below.
     dicts_folder = output_folder + 'dicts_and_encoded_texts/'
     edges_folder = output_folder + 'edges/'
     graph_folder = output_folder + 'graph/'
@@ -23,8 +22,12 @@ class TestProcessings(unittest.TestCase):
     min_count = 5
     max_vocab_size = 3
 
+    @staticmethod
+    def tokenizer_unittest(s):
+        return s.strip().split(' ')
+
     def test_1_word_processing(self):
-        wp = WordProcessing(output_folder=self.dicts_folder, word_tokenizer='', wtokenizer=Tokenizer.mytok,
+        wp = WordProcessing(output_folder=self.dicts_folder, word_tokenizer='', wtokenizer=self.tokenizer_unittest,
                             remove_numbers=False, remove_punctuations=False, stem_word=False, lowercase=False)
         # wp.fromfile(self.data_folder + 'AA/wiki_03.txt')
         merged_dict = wp.apply(data_folder=self.data_folder, process_num=self.process_num)

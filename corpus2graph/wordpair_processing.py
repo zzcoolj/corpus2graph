@@ -163,7 +163,8 @@ class WordPairsProcessing(object):
                                                counted_edges_of_specific_window_size, 'tuple')
         return counted_edges_of_specific_window_size
 
-    def convert_encoded_edges_count_for_undirected_graph(self, old_encoded_edges_count_path):
+    @staticmethod
+    def convert_encoded_edges_count_for_undirected_graph(old_encoded_edges_count_path):
         """e.g.
         In old encoded edges count file:
             17  57  8
@@ -189,13 +190,22 @@ class WordPairsProcessing(object):
             else:
                 # The first time merged_weight_edges meets edge[source][target] or its inverse edge edge[target][source]
                 merged_weight_edges[(source, target)] = int(weight)
-        output_name = multi_processing.get_file_name(old_encoded_edges_count_path).split('.txt')[0] + '_undirected.txt'
-        util.write_dict_type_specified(self.graph_folder + output_name, merged_weight_edges, 'tuple')
+        output_name = old_encoded_edges_count_path.split('.txt')[0] + '_undirected.txt'
+        util.write_dict_type_specified(output_name, merged_weight_edges, 'tuple')
         return merged_weight_edges
 
     def apply(self, process_num):
         self.write_valid_vocabulary()
-        return self.multiprocessing_merge_edges_count_of_a_specific_window_size(process_num=process_num)
+        result = self.multiprocessing_merge_edges_count_of_a_specific_window_size(process_num=process_num)
+
+        # Convert all directed files to undirected version
+        file_paths_list = multi_processing.get_files_startswith(data_folder=self.graph_folder,
+                                                                starting="encoded_edges_count_window_size_")
+        for path in file_paths_list:
+            if '_undirected' not in path:
+                self.convert_encoded_edges_count_for_undirected_graph(old_encoded_edges_count_path=path)
+
+        return result  # return the last DIRECTED encoded edges count file #TODO NOW NOW NOW check all use case of this result. Maybe remove this return
 
     def __call__(self, process_num):
         self.apply(process_num)
