@@ -3,8 +3,6 @@ __author__ = 'Zheng ZHANG'
 import nltk.data
 import os
 import errno
-# TODO Does it still work after comment this? If not, add this in config.ini
-# nltk.data.path.append("/Users/zzcoolj/Code/NLTK/nltk_data")
 
 
 def tokenize_informal_paragraph_into_sentences(paragraph):

@@ -2,6 +2,7 @@ import string
 import warnings
 import re
 from . import util
+import spacy
 
 
 class FileParser(object):
@@ -42,35 +43,56 @@ class FileParser(object):
 
 class WordPreprocessor(object):
     # default: config file.
-    def __init__(self, remove_numbers, replace_digits_to_zeros, remove_punctuations,
+    def __init__(self, language, remove_stop_words, remove_numbers, replace_digits_to_zeros, remove_punctuations,
                  stem_word, lowercase, wpreprocessor):
+        if remove_stop_words:
+            if language == 'en':
+                self.stop_words_decider = spacy.load('en')
+            elif language == 'fr':
+                self.stop_words_decider = spacy.load('fr')
+            else:
+                print('[ERROR] No stop words list of this language.')
+                exit()
+
+        self.remove_stop_words = remove_stop_words
         self.remove_numbers = remove_numbers
         self.replace_digits_to_zeros = replace_digits_to_zeros
         self.remove_punctuations = remove_punctuations
         self.stem_word = stem_word
         self.lowercase = lowercase
         self.wpreprocessor = wpreprocessor
+
         punctuations = set(string.punctuation)
-        punctuations.update({'“', '”', '—'})
+        punctuations.update({'“', '”', '—'})  # English
+        punctuations.update({'...', '«', '»'})  # French
         self.puncs = punctuations
 
     def apply(self, word):
+        # Removing
         if self.remove_numbers and word.isnumeric():
             return ''
         if self.replace_digits_to_zeros:
             word = re.sub('\d', '0', word)
-        # Remove punctuations
-        # if all(j.isdigit() or j in puncs for j in word):
         if self.remove_punctuations:
             if all(c in self.puncs for c in word):
                 return ''
+        # Remove combinations of punctuations and digits
+        if self.remove_numbers and self.remove_punctuations:
+            if all(j.isdigit() or j in self.puncs for j in word):
+                return ''
+        # remove stop words
+        if self.remove_stop_words and self.stop_words_decider.vocab[word].is_stop:
+            return ''
+
         # Stem word
         if self.stem_word:
             word = util.stem_word(word)
+
         # Make all words in lowercase
         if self.lowercase:
             word = word.lower()
 
+        # customized word preprocessor
         if self.wpreprocessor is not None:
             if not callable(self.wpreprocessor):
                 msg = 'wpreprocessor should be callable'
@@ -93,7 +115,6 @@ class Tokenizer(object):
         An example of user customized tokenizer.
         :return: list of tokens
         """
-        import spacy
         # tk = spacy.load('en_core_web_sm')
         tk = spacy.load('fr')
         return [token.text for token in tk(str.strip(s))]
