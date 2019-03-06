@@ -109,17 +109,14 @@ class WordPreprocessor(object):
 
 
 class Tokenizer(object):
-    @staticmethod
-    def mytok(s):
+    def mytok(self, s):
         """
         An example of user customized tokenizer.
         :return: list of tokens
         """
-        # tk = spacy.load('en_core_web_sm')
-        tk = spacy.load('fr')
-        return [token.text for token in tk(str.strip(s))]
+        return [token.text for token in self.tk(str.strip(s))]
 
-    def __init__(self, word_tokenizer='Treebank', wtokenizer=None):
+    def __init__(self, word_tokenizer='Treebank', wtokenizer=None, language=None):
         if word_tokenizer not in ['Treebank', 'PunktWord', 'WordPunct', '']:
             msg = 'word_tokenizer "{word_tokenizer}" should be Treebank, PunktWord, WordPunct or empty'
             raise ValueError(msg.format(word_tokenizer=word_tokenizer))
@@ -143,6 +140,13 @@ class Tokenizer(object):
                     warnings.warn(msg)
                     self.tokenizer = None
                 else:
+                    if language == 'en':
+                        self.tk = spacy.load('en')
+                    elif language == 'fr':
+                        self.tk = spacy.load('fr')
+                    else:
+                        print('customized tokenizer language not supported')
+                        exit()
                     self.tokenizer = wtokenizer
 
     def apply(self, text):

@@ -21,7 +21,7 @@ class WordProcessing(object):
                                                   remove_punctuations=remove_punctuations,
                                                   stem_word=stem_word, lowercase=lowercase,
                                                   wpreprocessor=wpreprocessor)
-        self.tokenizer = Tokenizer(word_tokenizer=word_tokenizer, wtokenizer=wtokenizer)
+        self.tokenizer = Tokenizer(word_tokenizer=word_tokenizer, wtokenizer=wtokenizer, language=language)
 
     def fromfile(self, file_path):
         """
