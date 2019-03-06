@@ -82,6 +82,7 @@ class WordPreprocessor(object):
                 return ''
         # remove stop words
         if self.remove_stop_words and self.stop_words_decider.vocab[word].is_stop:
+            print(word, 'is stop words')
             return ''
 
         # Stem word
@@ -140,9 +141,12 @@ class Tokenizer(object):
                     warnings.warn(msg)
                     self.tokenizer = None
                 else:
+                    # TODO NOW mytok is not so 'customized'
                     if language == 'en':
+                        print('en tokenizer loaded')
                         self.tk = spacy.load('en')
                     elif language == 'fr':
+                        print('fr tokenizer loaded')
                         self.tk = spacy.load('fr')
                     else:
                         print('customized tokenizer language not supported')
