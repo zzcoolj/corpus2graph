@@ -3,6 +3,7 @@ from multiprocessing import Pool
 from . import util
 from . import multi_processing
 from .word_processor import FileParser, WordPreprocessor, Tokenizer
+import spacy
 
 
 class WordProcessing(object):
@@ -16,12 +17,14 @@ class WordProcessing(object):
         self.file_extension = file_parser
         self.word_preprocessor = WordPreprocessor(remove_numbers=remove_numbers,
                                                   remove_stop_words=remove_stop_words,
-                                                  language=language,
                                                   replace_digits_to_zeros=replace_digits_to_zeros,
                                                   remove_punctuations=remove_punctuations,
                                                   stem_word=stem_word, lowercase=lowercase,
                                                   wpreprocessor=wpreprocessor)
-        self.tokenizer = Tokenizer(word_tokenizer=word_tokenizer, wtokenizer=wtokenizer, language=language)
+        self.language = language
+        self.word_tokenizer = word_tokenizer
+        self.remove_stop_words = remove_stop_words
+        self.tokenizer = Tokenizer(word_tokenizer=word_tokenizer, wtokenizer=wtokenizer)
 
     def fromfile(self, file_path):
         """
@@ -29,13 +32,30 @@ class WordProcessing(object):
         """
         print('Processing file %s (%s)...' % (file_path, multi_processing.get_pid()))
 
+        """
+        Give spacy tokenizer special treatment here (not in Tokenizer in word_processor.py).
+        Because spacy has error :
+            AttributeError: Can't pickle local object 'FeatureExtracter.<locals>.feature_extracter_fwd'
+        So it can't be transferred as an object by using 'self', self.tokenizer is useless in this case.
+        Each thread loads spacy once when a job has been sent to this thread.        
+        """
+        spacy_loader = None
+        if self.word_tokenizer == 'spacy' or self.remove_stop_words:
+            if self.language == 'en':
+                # print('en spacy tokenizer loaded')
+                spacy_loader = spacy.load('en')
+            elif self.language == 'fr':
+                # print('fr spacy tokenizer loaded')
+                spacy_loader = spacy.load('fr')
+
         word2id = dict()  # key: word <-> value: index
         id2word = dict()
         encoded_text = []
+
         for sent in self.file_parser(file_path):
             encoded_sent = []
-            for word in self.tokenizer.apply(sent):
-                word = self.word_preprocessor.apply(word)
+            for word in self.tokenizer.apply(sent, spacy_loader=spacy_loader):
+                word = self.word_preprocessor.apply(word, spacy_loader=spacy_loader)
                 if not word:
                     continue
                 if word not in word2id:

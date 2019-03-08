@@ -121,7 +121,7 @@ def main():
         lang = str(arguments['--lang'])
 
         start_time = time.time()
-        wp = WordProcessing(output_folder=dicts_folder, language=lang, word_tokenizer='', wtokenizer=Tokenizer.mytok,
+        wp = WordProcessing(output_folder=dicts_folder, language=lang, word_tokenizer='spacy', wtokenizer=Tokenizer.mytok,
                             remove_stop_words=True, remove_numbers=True, replace_digits_to_zeros=True,
                             remove_punctuations=True, stem_word=False, lowercase=True)
         merged_dict = wp.apply(data_folder=data_folder, process_num=process_num)

@@ -43,17 +43,8 @@ class FileParser(object):
 
 class WordPreprocessor(object):
     # default: config file.
-    def __init__(self, language, remove_stop_words, remove_numbers, replace_digits_to_zeros, remove_punctuations,
+    def __init__(self, remove_stop_words, remove_numbers, replace_digits_to_zeros, remove_punctuations,
                  stem_word, lowercase, wpreprocessor):
-        if remove_stop_words:
-            if language == 'en':
-                self.stop_words_decider = spacy.load('en')
-            elif language == 'fr':
-                self.stop_words_decider = spacy.load('fr')
-            else:
-                print('[ERROR] No stop words list of this language.')
-                exit()
-
         self.remove_stop_words = remove_stop_words
         self.remove_numbers = remove_numbers
         self.replace_digits_to_zeros = replace_digits_to_zeros
@@ -67,7 +58,7 @@ class WordPreprocessor(object):
         punctuations.update({'...', '«', '»'})  # French
         self.puncs = punctuations
 
-    def apply(self, word):
+    def apply(self, word, spacy_loader=None):
         # Removing
         if self.remove_numbers and word.isnumeric():
             return ''
@@ -81,8 +72,8 @@ class WordPreprocessor(object):
             if all(j.isdigit() or j in self.puncs for j in word):
                 return ''
         # remove stop words
-        if self.remove_stop_words and self.stop_words_decider.vocab[word].is_stop:
-            print(word, 'is stop words')
+        if self.remove_stop_words and spacy_loader.vocab[word].is_stop:
+            # print(word, 'is stop words')
             return ''
 
         # Stem word
@@ -110,18 +101,26 @@ class WordPreprocessor(object):
 
 
 class Tokenizer(object):
-    def mytok(self, s):
+    @staticmethod
+    def mytok(s):
         """
         An example of user customized tokenizer.
         :return: list of tokens
         """
-        return [token.text for token in self.tk(str.strip(s))]
+        # TODO NOW spacy.load here is a really stupid idea, cause each time apply has been called spacy.load need to run. TOO SLOW!!!
+        tk = spacy.load('en')
+        return [token.text for token in tk(str.strip(s))]
 
-    def __init__(self, word_tokenizer='Treebank', wtokenizer=None, language=None):
-        if word_tokenizer not in ['Treebank', 'PunktWord', 'WordPunct', '']:
+    def __init__(self, word_tokenizer='Treebank', wtokenizer=None):
+        self.word_tokenizer = None
+
+        if word_tokenizer not in ['Treebank', 'PunktWord', 'WordPunct', 'spacy', '']:
             msg = 'word_tokenizer "{word_tokenizer}" should be Treebank, PunktWord, WordPunct or empty'
             raise ValueError(msg.format(word_tokenizer=word_tokenizer))
-        if word_tokenizer == 'Treebank':
+        if word_tokenizer == 'spacy':
+            self.tokenizer = None
+            self.word_tokenizer = 'spacy'
+        elif word_tokenizer == 'Treebank':
             from nltk.tokenize import TreebankWordTokenizer
             self.tokenizer = TreebankWordTokenizer().tokenize
         elif word_tokenizer == 'PunktWord':
@@ -141,20 +140,13 @@ class Tokenizer(object):
                     warnings.warn(msg)
                     self.tokenizer = None
                 else:
-                    # TODO NOW mytok is not so 'customized'
-                    if language == 'en':
-                        print('en tokenizer loaded')
-                        self.tk = spacy.load('en')
-                    elif language == 'fr':
-                        print('fr tokenizer loaded')
-                        self.tk = spacy.load('fr')
-                    else:
-                        print('customized tokenizer language not supported')
-                        exit()
                     self.tokenizer = wtokenizer
 
-    def apply(self, text):
+    def apply(self, text, spacy_loader=None):
+        if self.word_tokenizer == 'spacy':
+            return [token.text for token in spacy_loader(str.strip(text))]
         if self.tokenizer is not None:
+            # TODO str.strip(text) needed?
             return self.tokenizer(text)
         else:
             return [text]
