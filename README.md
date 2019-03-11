@@ -18,18 +18,20 @@ If there is only one text file, this tool will automatically provide you an opti
 ```bash
 $ graph_from_corpus -h
 Usage:
-    graph_from_corpus all [--max_window_size=<max_window_size> --process_num=<process_num> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
-    graph_from_corpus wordprocessing [--max_window_size=<max_window_size> --process_num=<process_num> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
-    graph_from_corpus sentenceprocessing [--max_window_size=<max_window_size> --process_num=<process_num> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
-    graph_from_corpus wordpairsprocessing [--max_window_size=<max_window_size> --process_num=<process_num> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
-    graph_from_corpus -h | --help
-    graph_from_corpus --version
+    corpus2graph all [--process_num=<process_num> --lang=<lang> --max_window_size=<max_window_size> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
+    corpus2graph wordprocessing [--process_num=<process_num> --lang=<lang>] <data_dir> <output_dir>
+    corpus2graph sentenceprocessing [--max_window_size=<max_window_size> --process_num=<process_num>] <data_dir> <output_dir>
+    corpus2graph wordpairsprocessing [--max_window_size=<max_window_size> --process_num=<process_num> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
+    corpus2graph -h | --help
+    corpus2graph --version
 Options:
     <data_dir>                                                            Set data directory. This script expects
                                                                           all corpus data store in this directory
     <output_dir>                                                          Set output directory. The output graph matrix and
                                                                           other intermediate data will be stored in this directory.
                                                                           see "Output directory" section for more details
+    --lang=<lang>                                                         The language used for stop words, tokenizer, stemmer
+                                                                          [default: 'en']
     --max_window_size=<max_window_size>                                   The maximum window size to generate the word pairs.
                                                                           [default: 5]
     --process_num=<process_num>                                           The number of process you want to use.
