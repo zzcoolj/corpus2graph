@@ -132,7 +132,7 @@ class WordProcessing(object):
                 choice = input().lower()
                 if choice in yes:
                     # Splitting single large text file into smaller ones
-                    lines_per_file = 200  # TODO determine a reasonable number
+                    lines_per_file = 500  # TODO determine a reasonable number
                     if data_folder.endswith('/'):
                         new_folder = data_folder[:-1] + '_small_files/'
                     else:
