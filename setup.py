@@ -34,7 +34,7 @@ setup(
 
     entry_points={  # Optional
         'console_scripts': [
-            'graph_from_corpus=corpus2graph.applications.graph_from_corpus:main',
+            'corpus2graph=corpus2graph.applications.corpus2graph:main',
         ],
     },
 

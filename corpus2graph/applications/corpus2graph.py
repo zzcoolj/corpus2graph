@@ -2,12 +2,12 @@
 generate graph from file
 
 Usage:
-    graph_from_corpus all [--max_window_size=<max_window_size> --process_num=<process_num> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
-    graph_from_corpus wordprocessing [--process_num=<process_num> --lang=<lang>] <data_dir> <output_dir>
-    graph_from_corpus sentenceprocessing [--max_window_size=<max_window_size> --process_num=<process_num> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
-    graph_from_corpus wordpairsprocessing [--max_window_size=<max_window_size> --process_num=<process_num> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
-    graph_from_corpus -h | --help
-    graph_from_corpus --version
+    corpus2graph all [--process_num=<process_num> --lang=<lang> --max_window_size=<max_window_size> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
+    corpus2graph wordprocessing [--process_num=<process_num> --lang=<lang>] <data_dir> <output_dir>
+    corpus2graph sentenceprocessing [--max_window_size=<max_window_size> --process_num=<process_num>] <data_dir> <output_dir>
+    corpus2graph wordpairsprocessing [--max_window_size=<max_window_size> --process_num=<process_num> --min_count=<min_count> --max_vocab_size=<max_vocab_size> --safe_files_number_per_processor=<safe_files_number_per_processor>] <data_dir> <output_dir>
+    corpus2graph -h | --help
+    corpus2graph --version
 Options:
     <data_dir>                                                            Set data directory. This script expects
                                                                           all corpus data store in this directory
@@ -82,7 +82,7 @@ def main():
 
         start_time = time.time()
         # wordprocessing
-        wp = WordProcessing(output_folder=dicts_folder, language=lang, word_tokenizer='', wtokenizer=Tokenizer.mytok,
+        wp = WordProcessing(output_folder=dicts_folder, language=lang, word_tokenizer='spacy', wtokenizer=Tokenizer.mytok,
                             remove_stop_words=True, remove_numbers=True, replace_digits_to_zeros=True,
                             remove_punctuations=True, stem_word=False, lowercase=True)
         merged_dict = wp.apply(data_folder=data_folder, process_num=process_num)
