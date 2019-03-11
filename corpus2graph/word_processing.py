@@ -54,7 +54,7 @@ class WordProcessing(object):
 
         for sent in self.file_parser(file_path):
             encoded_sent = []
-            for word in self.tokenizer.apply(sent, spacy_loader=spacy_loader):
+            for word in self.tokenizer.apply(sent, spacy_loader=spacy_loader):  # sent is already striped in file_parser
                 word = self.word_preprocessor.apply(word, spacy_loader=spacy_loader)
                 if not word:
                     continue

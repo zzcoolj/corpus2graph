@@ -22,12 +22,12 @@ class FileParser(object):
     def xml_parser(self, file_path, xml_node_path):
         for paragraph in util.search_all_specific_nodes_in_xml_known_node_path(file_path, xml_node_path):
             for sent in util.tokenize_informal_paragraph_into_sentences(paragraph):
-                yield sent
+                yield str.strip(sent)
 
     def txt_parser(self, file_path):
         with open(file_path, 'r', encoding='utf-8') as file:
             for line in file:
-                yield line
+                yield str.strip(line)
 
     def __call__(self, file_path):
         if self.file_parser == 'txt':
@@ -109,7 +109,7 @@ class Tokenizer(object):
         """
         # TODO NOW spacy.load here is a really stupid idea, cause each time apply has been called spacy.load need to run. TOO SLOW!!!
         tk = spacy.load('en')
-        return [token.text for token in tk(str.strip(s))]
+        return [token.text for token in tk(s)]
 
     def __init__(self, word_tokenizer='Treebank', wtokenizer=None):
         self.word_tokenizer = None
@@ -144,9 +144,8 @@ class Tokenizer(object):
 
     def apply(self, text, spacy_loader=None):
         if self.word_tokenizer == 'spacy':
-            return [token.text for token in spacy_loader(str.strip(text))]
+            return [token.text for token in spacy_loader(text)]
         if self.tokenizer is not None:
-            # TODO str.strip(text) needed?
             return self.tokenizer(text)
         else:
             return [text]
